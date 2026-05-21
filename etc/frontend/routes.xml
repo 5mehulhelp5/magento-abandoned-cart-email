@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Frontend route registration.
+ *
+ * Per ETechFlow Module Development Standards §10, frontend-scoped config
+ * goes in etc/frontend/ NOT global etc/. This route only resolves in
+ * frontend area — which is correct: customers click email links, not
+ * admins.
+ *
+ * Result: URLs of the form {base}etechflow_abandonedcart/<controller>/<action>
+ * route to Controller/<Controller>/<Action>.php under our module. See
+ * [[Etechflow\AbandonedCart\Model\EmailVariableBuilder]] for the canonical
+ * URL formats that emails use.
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="standard">
+        <route id="etechflow_abandonedcart" frontName="etechflow_abandonedcart">
+            <module name="Etechflow_AbandonedCart"/>
+        </route>
+    </router>
+</config>

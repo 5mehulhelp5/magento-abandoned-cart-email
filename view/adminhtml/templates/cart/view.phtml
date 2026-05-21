@@ -1,0 +1,68 @@
+<?php
+/**
+ * Etechflow_AbandonedCart - Admin per-cart detail template (minimal v1.0.0).
+ *
+ * Reads the registered cart from Magento Registry (controller put it there)
+ * and renders a read-only summary table. Enhancement targets (Phase 17/18
+ * or future minor bumps): cart items list, email history with status icons,
+ * timeline chart, Send Now button inline.
+ *
+ * @var \Magento\Backend\Block\Template $block
+ */
+
+$registry = $block->getData('registry')
+    ?? \Magento\Framework\App\ObjectManager::getInstance()->get(\Magento\Framework\Registry::class);
+/** @var \Etechflow\AbandonedCart\Api\Data\AbandonedCartInterface|null $cart */
+$cart = $registry->registry(\Etechflow\AbandonedCart\Controller\Adminhtml\Cart\View::REGISTRY_CURRENT_CART);
+
+if ($cart === null) {
+    echo '<p>' . $block->escapeHtml(__('Cart not found.')) . '</p>';
+    return;
+}
+
+$statusLabels = [
+    1 => __('Pending'),
+    2 => __('Processing'),
+    3 => __('Recovered'),
+    4 => __('Expired'),
+    5 => __('Unsubscribed'),
+];
+$statusLabel = $statusLabels[$cart->getStatus()] ?? __('Unknown');
+?>
+<div class="admin__page-section" style="padding:20px;">
+    <h2 style="margin:0 0 16px;"><?= $block->escapeHtml(__('Cart #%1', $cart->getEntityId())) ?></h2>
+    <table class="admin__table-secondary" style="width:100%; max-width:800px; border-collapse:collapse;">
+        <tbody>
+            <tr><th style="text-align:left; padding:8px; width:30%;"><?= $block->escapeHtml(__('Status')) ?></th>
+                <td style="padding:8px;"><strong><?= $block->escapeHtml($statusLabel) ?></strong></td></tr>
+            <tr><th style="text-align:left; padding:8px;"><?= $block->escapeHtml(__('Customer Email')) ?></th>
+                <td style="padding:8px;"><?= $block->escapeHtml($cart->getCustomerEmail()) ?></td></tr>
+            <tr><th style="text-align:left; padding:8px;"><?= $block->escapeHtml(__('Customer Name')) ?></th>
+                <td style="padding:8px;"><?= $block->escapeHtml(trim(($cart->getCustomerFirstname() ?? '') . ' ' . ($cart->getCustomerLastname() ?? ''))) ?: '—' ?></td></tr>
+            <tr><th style="text-align:left; padding:8px;"><?= $block->escapeHtml(__('Quote ID')) ?></th>
+                <td style="padding:8px;"><?= (int) $cart->getQuoteId() ?></td></tr>
+            <tr><th style="text-align:left; padding:8px;"><?= $block->escapeHtml(__('Store ID')) ?></th>
+                <td style="padding:8px;"><?= (int) $cart->getStoreId() ?></td></tr>
+            <tr><th style="text-align:left; padding:8px;"><?= $block->escapeHtml(__('Items / Qty')) ?></th>
+                <td style="padding:8px;"><?= (int) $cart->getItemsCount() ?> / <?= (int) $cart->getItemsQty() ?></td></tr>
+            <tr><th style="text-align:left; padding:8px;"><?= $block->escapeHtml(__('Subtotal')) ?></th>
+                <td style="padding:8px;"><?= $block->escapeHtml($cart->getCurrencyCode() . ' ' . number_format($cart->getSubtotal(), 2)) ?></td></tr>
+            <tr><th style="text-align:left; padding:8px;"><?= $block->escapeHtml(__('Grand Total')) ?></th>
+                <td style="padding:8px;"><?= $block->escapeHtml($cart->getCurrencyCode() . ' ' . number_format($cart->getGrandTotal(), 2)) ?></td></tr>
+            <tr><th style="text-align:left; padding:8px;"><?= $block->escapeHtml(__('Emails Sent')) ?></th>
+                <td style="padding:8px;"><?= (int) $cart->getEmailsSent() ?></td></tr>
+            <tr><th style="text-align:left; padding:8px;"><?= $block->escapeHtml(__('Last Email Sent')) ?></th>
+                <td style="padding:8px;"><?= $block->escapeHtml($cart->getLastEmailSentAt() ?? '—') ?></td></tr>
+            <tr><th style="text-align:left; padding:8px;"><?= $block->escapeHtml(__('Abandoned At')) ?></th>
+                <td style="padding:8px;"><?= $block->escapeHtml($cart->getAbandonedAt()) ?></td></tr>
+            <?php if ($cart->getRecoveredAt()): ?>
+            <tr><th style="text-align:left; padding:8px;"><?= $block->escapeHtml(__('Recovered At')) ?></th>
+                <td style="padding:8px;"><?= $block->escapeHtml($cart->getRecoveredAt()) ?></td></tr>
+            <tr><th style="text-align:left; padding:8px;"><?= $block->escapeHtml(__('Recovered Order ID')) ?></th>
+                <td style="padding:8px;"><?= (int) $cart->getRecoveredOrderId() ?></td></tr>
+            <tr><th style="text-align:left; padding:8px;"><?= $block->escapeHtml(__('Recovered Revenue')) ?></th>
+                <td style="padding:8px;"><?= $block->escapeHtml($cart->getCurrencyCode() . ' ' . number_format($cart->getRecoveredRevenue() ?? 0.0, 2)) ?></td></tr>
+            <?php endif; ?>
+        </tbody>
+    </table>
+</div>

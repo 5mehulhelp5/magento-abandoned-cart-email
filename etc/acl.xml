@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Admin ACL resources.
+ *
+ * Defines the four permission nodes admins can grant/revoke via
+ * System → Permissions → User Roles:
+ *
+ *   Etechflow_AbandonedCart::main    — parent menu visibility
+ *     ├── ::carts                    — view + manage abandoned-cart grid
+ *     ├── ::rules                    — view + manage email rules
+ *     └── ::reports                  — view recovery dashboard
+ *
+ *   Etechflow_AbandonedCart::config  — edit the Stores → Configuration section
+ *
+ * Granular nodes let merchants give marketing folks rule + report access
+ * without exposing the full configuration (which contains the license key
+ * + SMTP-adjacent settings).
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+
+                <resource id="Magento_Backend::marketing">
+                    <resource id="Etechflow_AbandonedCart::main"
+                              title="ETechFlow Abandoned Cart"
+                              sortOrder="50">
+                        <resource id="Etechflow_AbandonedCart::carts"
+                                  title="Abandoned Carts"
+                                  sortOrder="10"/>
+                        <resource id="Etechflow_AbandonedCart::rules"
+                                  title="Email Rules"
+                                  sortOrder="20"/>
+                        <resource id="Etechflow_AbandonedCart::reports"
+                                  title="Reports"
+                                  sortOrder="30"/>
+                    </resource>
+                </resource>
+
+                <resource id="Magento_Backend::stores">
+                    <resource id="Magento_Backend::stores_settings">
+                        <resource id="Magento_Config::config">
+                            <resource id="Etechflow_AbandonedCart::config"
+                                      title="ETechFlow Abandoned Cart Configuration"
+                                      sortOrder="500"/>
+                        </resource>
+                    </resource>
+                </resource>
+
+            </resource>
+        </resources>
+    </acl>
+</config>

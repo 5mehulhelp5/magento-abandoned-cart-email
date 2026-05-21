@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Cron schedule.
+ *
+ * SendReminders runs every 5 minutes (matches Magento's default cron tick
+ * cadence) so freshly-abandoned carts past their threshold get picked up
+ * with minimal delay. Cleanup runs once a day at 3am — light query load
+ * scheduled outside peak hours.
+ *
+ * Both jobs use the `default` cron group, so they run inside Magento's
+ * standard cron loop rather than requiring a dedicated consumer. Lock files
+ * (see [[Etechflow\AbandonedCart\Model\CronLock]]) prevent overlapping
+ * runs if a previous tick is still in flight.
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+
+    <group id="default">
+
+        <job name="etechflow_abandoned_cart_send_reminders"
+             instance="Etechflow\AbandonedCart\Cron\SendReminders"
+             method="execute">
+            <schedule>*/5 * * * *</schedule>
+        </job>
+
+        <!--
+            SendQueuedEmails runs on the offset minute (2,7,12,...,57) so the
+            transmit pass picks up what SendReminders just queued in the same
+            5-minute window without competing for the same lock semantics.
+        -->
+        <job name="etechflow_abandoned_cart_send_queued_emails"
+             instance="Etechflow\AbandonedCart\Cron\SendQueuedEmails"
+             method="execute">
+            <schedule>2-57/5 * * * *</schedule>
+        </job>
+
+        <job name="etechflow_abandoned_cart_cleanup"
+             instance="Etechflow\AbandonedCart\Cron\Cleanup"
+             method="execute">
+            <schedule>0 3 * * *</schedule>
+        </job>
+
+    </group>
+
+</config>

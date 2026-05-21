@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Admin-scope DI.
+ *
+ * Per ETechFlow Module Development Standards §10, admin-only DI overrides
+ * live here (NOT in global etc/di.xml).
+ *
+ * Wires:
+ *   1. The cart-listing UI Component's data source to our Grid Collection.
+ *   2. (Phase 17) The rule-listing UI Component's data source — left as a
+ *      placeholder commit when that ships.
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="etechflow_abandonedcart_cart_listing_data_source"
+                      xsi:type="string">Etechflow\AbandonedCart\Model\ResourceModel\AbandonedCart\Grid\Collection</item>
+                <item name="etechflow_abandonedcart_rule_listing_data_source"
+                      xsi:type="string">Etechflow\AbandonedCart\Model\ResourceModel\Rule\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+
+</config>

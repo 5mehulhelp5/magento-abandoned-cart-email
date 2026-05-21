@@ -1,0 +1,179 @@
+ETECHFLOW PROPRIETARY LICENSE AGREEMENT
+Version 1.0 — effective 2026-05-19
+
+Copyright (c) 2026 ETechFlow. All rights reserved.
+
+THIS IS A LEGAL AGREEMENT between you (the "Licensee", whether an individual
+or an entity) and ETechFlow ("Licensor"). By installing, copying, downloading,
+or otherwise using the software accompanying this license (the "Software"),
+the Licensee agrees to be bound by the terms of this Agreement. If the Licensee
+does not agree, the Licensee must not install, copy, or use the Software.
+
+================================================================================
+1. DEFINITIONS
+================================================================================
+
+"Software" means the Etechflow_AbandonedCart Magento 2 extension, including all
+PHP source files, XML configuration files, JavaScript, CSS, email templates,
+documentation, and any updates or patches the Licensor may issue.
+
+"Production Installation" means an installation of Magento 2 that serves real
+customer traffic on a public-facing domain.
+
+"Development Installation" means an installation used solely for testing,
+staging, or local development. A Development Installation is one whose hostname
+contains ".test", ".local", ".localhost", ".warden.test", ".docksal", ".ddev",
+".lando", "localhost", or "127.0.0.1", or whose admin setting "Production
+Environment" is set to "No".
+
+"License Key" means the HMAC-signed activation string issued by ETechFlow upon
+purchase that grants the Licensee the right to use the Software on a specific
+Production Installation domain.
+
+================================================================================
+2. GRANT OF LICENSE
+================================================================================
+
+Subject to the terms of this Agreement and the Licensee's payment of all
+applicable fees, ETechFlow grants the Licensee a non-exclusive, non-transferable,
+non-sublicensable license to:
+
+  (a) install and use the Software on ONE (1) Production Installation per
+      License Key purchased; and
+  (b) install and use the Software on an UNLIMITED number of Development
+      Installations associated with the same Licensee, without a License Key.
+
+Bundle keys, if purchased separately, may activate multiple ETechFlow modules
+sharing the same Production Installation domain.
+
+================================================================================
+3. RESTRICTIONS
+================================================================================
+
+The Licensee shall NOT:
+
+  (a) copy, redistribute, sell, sublicense, rent, lease, lend, or otherwise
+      transfer the Software or any portion of it to any third party;
+  (b) reverse engineer, decompile, disassemble, or attempt to derive the source
+      code of any obfuscated portion of the Software, except to the extent
+      such activity is expressly permitted by applicable law;
+  (c) remove, alter, or obscure any copyright, trademark, license, or other
+      proprietary notice in the Software;
+  (d) use the Software on more Production Installations than the License Key(s)
+      purchased permit;
+  (e) circumvent, disable, or interfere with the license validation mechanism;
+  (f) use the Software to build a competing product;
+  (g) use the Software for any unlawful purpose.
+
+================================================================================
+4. LICENSE VALIDATION
+================================================================================
+
+The Software includes a license validation mechanism that verifies the License
+Key on each request in Production Installations. Development Installations are
+auto-detected and bypassed.
+
+If the License Key is missing, invalid, or expired in a Production Installation,
+the Software will silently disable itself: it will not crash the storefront,
+admin, or checkout, and will display one notice in the admin module status
+block indicating that licensing is required.
+
+================================================================================
+5. UPDATES AND SUPPORT
+================================================================================
+
+The Licensee is entitled to all minor and patch updates (versions 1.x.y) issued
+within twelve (12) months of purchase. Major version updates (2.0.0+) may
+require an additional fee.
+
+ETechFlow provides email support at the address published on its website
+(currently support@etechflow.com) on a commercially reasonable best-effort
+basis. ETechFlow does not guarantee response times.
+
+================================================================================
+6. INTELLECTUAL PROPERTY
+================================================================================
+
+The Software is the proprietary property of ETechFlow and is protected by
+copyright law and international treaty provisions. ETechFlow retains all right,
+title, and interest in the Software, including all copyrights, patents, trade
+secrets, trademarks, and other intellectual property rights. No title to or
+ownership of the Software is transferred to the Licensee.
+
+================================================================================
+7. WARRANTY DISCLAIMER
+================================================================================
+
+THE SOFTWARE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTY OF ANY
+KIND, WHETHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE. ETECHFLOW SPECIFICALLY
+DISCLAIMS ALL IMPLIED WARRANTIES INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND
+NON-INFRINGEMENT.
+
+THE LICENSEE ACKNOWLEDGES THAT THE SOFTWARE MAY CONTAIN ERRORS OR DEFECTS AND
+THAT ETECHFLOW DOES NOT WARRANT THAT THE SOFTWARE WILL OPERATE UNINTERRUPTED OR
+ERROR-FREE, OR THAT ALL ERRORS WILL BE CORRECTED.
+
+================================================================================
+8. LIMITATION OF LIABILITY
+================================================================================
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL ETECHFLOW
+BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE
+DAMAGES, OR ANY LOSS OF PROFITS, REVENUE, DATA, GOODWILL, OR USE, ARISING OUT
+OF OR IN CONNECTION WITH THIS AGREEMENT OR THE SOFTWARE, WHETHER BASED ON
+CONTRACT, TORT, STRICT LIABILITY, OR ANY OTHER LEGAL THEORY, AND WHETHER OR
+NOT ETECHFLOW HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+ETECHFLOW'S TOTAL CUMULATIVE LIABILITY UNDER THIS AGREEMENT SHALL NOT EXCEED
+THE AMOUNT PAID BY THE LICENSEE FOR THE SOFTWARE IN THE TWELVE (12) MONTHS
+PRECEDING THE EVENT GIVING RISE TO THE CLAIM.
+
+================================================================================
+9. TERMINATION
+================================================================================
+
+This Agreement is effective until terminated. ETechFlow may terminate this
+Agreement immediately upon written notice if the Licensee breaches any term
+of this Agreement and fails to cure such breach within thirty (30) days of
+written notice.
+
+Upon termination, the Licensee must:
+
+  (a) immediately cease all use of the Software;
+  (b) uninstall the Software from all installations; and
+  (c) destroy all copies of the Software in the Licensee's possession.
+
+Sections 3, 6, 7, 8, 9, and 10 shall survive termination of this Agreement.
+
+================================================================================
+10. GOVERNING LAW
+================================================================================
+
+This Agreement shall be governed by and construed in accordance with the laws
+of Pakistan, without regard to its conflict of law principles. Any dispute
+arising out of or in connection with this Agreement shall be resolved
+exclusively in the competent courts located in Pakistan.
+
+================================================================================
+11. ENTIRE AGREEMENT
+================================================================================
+
+This Agreement constitutes the entire agreement between the Licensee and
+ETechFlow regarding the Software and supersedes all prior and contemporaneous
+agreements, proposals, or representations, written or oral.
+
+If any provision of this Agreement is held to be invalid or unenforceable,
+the remaining provisions shall remain in full force and effect.
+
+================================================================================
+12. CONTACT
+================================================================================
+
+ETechFlow
+Email: etechflow0@gmail.com
+Website: https://etechflow.com
+
+================================================================================
+END OF LICENSE AGREEMENT
+================================================================================

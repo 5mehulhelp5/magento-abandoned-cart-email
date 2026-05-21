@@ -1,0 +1,71 @@
+<!--@subject {{trans "Still thinking it over? Your cart is saved"}} @-->
+<!--@vars {
+    "var customer_firstname":"Customer First Name",
+    "var cart":"Abandoned Cart Record",
+    "var restore_url":"One-Click Cart Restore URL",
+    "var unsubscribe_url":"Unsubscribe URL",
+    "var tracking_pixel_url":"Open-Tracking Pixel URL",
+    "var store.frontend_name":"Store Name"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+<table cellpadding="0" cellspacing="0" border="0" width="100%"
+       style="background:#ffffff; font-family:'Inter',system-ui,sans-serif; color:#111827; font-size:15px; line-height:1.6;">
+    <tr>
+        <td style="padding:32px;">
+
+            <h1 style="margin:0 0 12px; font-size:28px; color:#0f172a; font-weight:700; letter-spacing:-0.5px;">
+                {{depend customer_firstname}}{{trans "Hey %name," name=$customer_firstname}}{{/depend}}
+                {{ifnot customer_firstname}}{{trans "Hey there,"}}{{/ifnot}}
+            </h1>
+
+            <p style="margin:0 0 20px; color:#374151;">
+                {{trans "We saved the items you were browsing at %store_name. Ready to finish checking out?" store_name=$store.frontend_name}}
+            </p>
+
+            {{block class="Etechflow\\AbandonedCart\\Block\\Email\\CartItems"
+                    area="frontend"
+                    template="Etechflow_AbandonedCart::email/cart_items.phtml"
+                    cart=$cart}}
+
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:28px 0;">
+                <tr>
+                    <td align="center">
+                        <a href="{{var restore_url}}"
+                           style="display:inline-block; padding:16px 36px; background-color:#0f172a; color:#ffffff; text-decoration:none; font-weight:600; border-radius:8px; font-size:16px; letter-spacing:0.2px;">
+                            {{trans "Restore My Cart"}}
+                        </a>
+                    </td>
+                </tr>
+            </table>
+
+            <p style="margin:24px 0 0; color:#6b7280; font-size:13px;">
+                {{trans "Trouble with the button? Use this link instead:"}}
+                <br/>
+                <a href="{{var restore_url}}" style="color:#0f172a; word-break:break-all;">{{var restore_url}}</a>
+            </p>
+
+        </td>
+    </tr>
+</table>
+
+<table cellpadding="0" cellspacing="0" border="0" width="100%"
+       style="background:#f9fafb; font-family:'Inter',system-ui,sans-serif; font-size:12px; color:#6b7280;">
+    <tr>
+        <td style="padding:24px 32px; text-align:center;">
+            <p style="margin:0 0 8px;">
+                {{trans "You're getting this because you started a checkout at %store_name." store_name=$store.frontend_name}}
+            </p>
+            <p style="margin:0;">
+                <a href="{{var unsubscribe_url}}" style="color:#6b7280; text-decoration:underline;">{{trans "Unsubscribe"}}</a>
+            </p>
+        </td>
+    </tr>
+</table>
+
+{{depend tracking_pixel_url}}
+<img src="{{var tracking_pixel_url}}" width="1" height="1" alt="" style="display:block; border:0;" />
+{{/depend}}
+
+{{template config_path="design/email/footer_template"}}

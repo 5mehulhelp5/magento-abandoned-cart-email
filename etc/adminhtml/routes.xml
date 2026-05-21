@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Admin route registration.
+ *
+ * Resolves URLs of the form
+ *   /admin/etechflow_abandonedcart/<controller>/<action>/key/<secret>/
+ * to Controller/Adminhtml/<Controller>/<Action>.php under our module.
+ *
+ * Admin controllers (Phase 16-18) live at Controller/Adminhtml/Cart/...,
+ * Controller/Adminhtml/Rule/..., Controller/Adminhtml/Report/... .
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="admin">
+        <route id="etechflow_abandonedcart" frontName="etechflow_abandonedcart">
+            <module name="Etechflow_AbandonedCart"/>
+        </route>
+    </router>
+</config>

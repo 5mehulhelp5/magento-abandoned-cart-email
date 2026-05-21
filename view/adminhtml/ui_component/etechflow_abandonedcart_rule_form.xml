@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Rule edit/new form UI Component.
+ *
+ * Four fieldsets:
+ *   1. General Info   — name, description, is_active, priority
+ *   2. Schedule       — send_after_minutes, sequence_number, apply_to_guests
+ *   3. Email          — template, sender identity
+ *   4. Targeting      — stores, customer groups, subtotal range
+ *
+ * Data flow:
+ *   - DataProvider class (Model/Rule/DataProvider.php) returns the current
+ *     rule's data, keyed by rule_id, with CSV columns split to arrays
+ *     for the multiselects.
+ *   - Save controller (Controller/Adminhtml/Rule/Save.php) re-joins the
+ *     multiselect arrays back to CSV before persisting.
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">etechflow_abandonedcart_rule_form.etechflow_abandonedcart_rule_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Email Rule</item>
+        <item name="config" xsi:type="array">
+            <item name="dataScope" xsi:type="string">data</item>
+            <item name="namespace" xsi:type="string">etechflow_abandonedcart_rule_form</item>
+        </item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
+    </argument>
+
+    <settings>
+        <namespace>etechflow_abandonedcart_rule_form</namespace>
+        <deps>
+            <dep>etechflow_abandonedcart_rule_form.etechflow_abandonedcart_rule_form_data_source</dep>
+        </deps>
+    </settings>
+
+    <dataSource name="etechflow_abandonedcart_rule_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <settings>
+            <submitUrl path="*/*/save"/>
+        </settings>
+        <dataProvider class="Etechflow\AbandonedCart\Model\Rule\DataProvider"
+                      name="etechflow_abandonedcart_rule_form_data_source">
+            <settings>
+                <requestFieldName>rule_id</requestFieldName>
+                <primaryFieldName>rule_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <!-- ============================================================ -->
+    <!-- General Info -->
+    <!-- ============================================================ -->
+    <fieldset name="general">
+        <settings>
+            <label translate="true">General Information</label>
+            <collapsible>false</collapsible>
+        </settings>
+
+        <field name="name" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Rule Name</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+
+        <field name="description" formElement="textarea">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Description</label>
+                <notice translate="true">Visible to admins in the Rules grid — describe when this rule fires.</notice>
+            </settings>
+        </field>
+
+        <field name="is_active" formElement="select">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="number">0</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>boolean</dataType>
+                <label translate="true">Active</label>
+                <notice translate="true">When off, this rule never fires regardless of conditions.</notice>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Magento\Config\Model\Config\Source\Yesno"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="priority" formElement="input">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="number">10</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Priority</label>
+                <validation>
+                    <rule name="validate-zero-or-greater" xsi:type="boolean">true</rule>
+                </validation>
+                <notice translate="true">Lower numbers fire first when multiple rules match the same cart.</notice>
+            </settings>
+        </field>
+    </fieldset>
+
+    <!-- ============================================================ -->
+    <!-- Schedule -->
+    <!-- ============================================================ -->
+    <fieldset name="schedule">
+        <settings>
+            <label translate="true">Schedule</label>
+        </settings>
+
+        <field name="send_after_minutes" formElement="input">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="number">60</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Send After (minutes)</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-greater-than-zero" xsi:type="boolean">true</rule>
+                </validation>
+                <notice translate="true">How many minutes after the cart goes idle this email fires.</notice>
+            </settings>
+        </field>
+
+        <field name="sequence_number" formElement="input">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="number">1</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Sequence Number</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-greater-than-zero" xsi:type="boolean">true</rule>
+                </validation>
+                <notice translate="true">1 = first reminder in a sequence, 2 = second, etc. Counts against Maximum Emails per Cart.</notice>
+            </settings>
+        </field>
+
+        <field name="apply_to_guests" formElement="select">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="number">1</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>boolean</dataType>
+                <label translate="true">Apply to Guest Carts</label>
+                <notice translate="true">When off, this rule only fires for logged-in customers.</notice>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Magento\Config\Model\Config\Source\Yesno"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+    </fieldset>
+
+    <!-- ============================================================ -->
+    <!-- Email -->
+    <!-- ============================================================ -->
+    <fieldset name="email">
+        <settings>
+            <label translate="true">Email</label>
+        </settings>
+
+        <field name="email_template" formElement="select">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Email Template</label>
+                <notice translate="true">Leave default to use the system-wide default template. Clone a template under Marketing → Email Templates to customize.</notice>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Magento\Config\Model\Config\Source\Email\Template"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="email_sender" formElement="select">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="string">general</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Sender Identity</label>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Magento\Config\Model\Config\Source\Email\Identity"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+    </fieldset>
+
+    <!-- ============================================================ -->
+    <!-- Targeting -->
+    <!-- ============================================================ -->
+    <fieldset name="targeting">
+        <settings>
+            <label translate="true">Targeting</label>
+        </settings>
+
+        <field name="store_ids" formElement="multiselect">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="string">0</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Stores</label>
+                <notice translate="true">Restrict this rule to specific stores. Select "All Store Views" to fire on every store.</notice>
+            </settings>
+            <formElements>
+                <multiselect>
+                    <settings>
+                        <options class="Magento\Store\Model\System\Store"/>
+                    </settings>
+                </multiselect>
+            </formElements>
+        </field>
+
+        <field name="customer_group_ids" formElement="multiselect">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="string">0</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Customer Groups</label>
+                <notice translate="true">Restrict this rule to specific customer groups. Includes "NOT LOGGED IN" for guests.</notice>
+            </settings>
+            <formElements>
+                <multiselect>
+                    <settings>
+                        <options class="Magento\Customer\Model\ResourceModel\Group\Collection"/>
+                    </settings>
+                </multiselect>
+            </formElements>
+        </field>
+
+        <field name="min_cart_subtotal" formElement="input">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Minimum Cart Subtotal</label>
+                <notice translate="true">Only fire if the cart's subtotal is at least this amount. Leave blank for no minimum.</notice>
+            </settings>
+        </field>
+
+        <field name="max_cart_subtotal" formElement="input">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Maximum Cart Subtotal</label>
+                <notice translate="true">Only fire if the cart's subtotal is at most this amount. Leave blank for no maximum.</notice>
+            </settings>
+        </field>
+    </fieldset>
+
+</form>

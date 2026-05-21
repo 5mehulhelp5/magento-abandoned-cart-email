@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Event observer wiring.
+ *
+ * Observer names are prefixed `etechflow_abandoned_cart_*` so they sort
+ * predictably in `bin/magento dev:events:list` output and so that any
+ * future plugin/observer added by this module follows the same prefix.
+ *
+ * Why these two events specifically:
+ *   - sales_quote_save_after: fires on every cart mutation. The
+ *     CartSaveObserver keeps our tracking row in sync with the live quote.
+ *   - sales_order_place_after: fires once per checkout completion. The
+ *     OrderPlaceAfterObserver attributes the recovery back to the
+ *     abandoned-cart record + most recently engaged email.
+ *
+ * The QuoteManagement::submit() plugin (registered in etc/di.xml) is the
+ * belt-and-suspenders backup for sales_order_place_after — they converge
+ * on RecoveryService which is idempotent.
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+
+    <event name="sales_quote_save_after">
+        <observer name="etechflow_abandoned_cart_track_cart_save"
+                  instance="Etechflow\AbandonedCart\Observer\CartSaveObserver"/>
+    </event>
+
+    <event name="sales_order_place_after">
+        <observer name="etechflow_abandoned_cart_recovery_attribution"
+                  instance="Etechflow\AbandonedCart\Observer\OrderPlaceAfterObserver"/>
+    </event>
+
+</config>

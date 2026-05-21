@@ -1,0 +1,94 @@
+<?php
+/**
+ * Etechflow_AbandonedCart - Recovery dashboard template.
+ *
+ * @var \Etechflow\AbandonedCart\Block\Adminhtml\Report\Dashboard $block
+ */
+
+$summary = $block->getSummary();
+$perRule = $block->getPerRuleSummary();
+$from    = $block->getFromDate();
+$to      = $block->getToDate();
+?>
+<div style="padding:20px;">
+
+    <!-- Date range filter -->
+    <form action="<?= $block->escapeUrl($block->getFilterFormAction()) ?>" method="get" style="margin-bottom:24px; padding:16px; background:#f5f5f5; border-radius:6px;">
+        <label style="margin-right:8px; font-weight:bold;"><?= $block->escapeHtml(__('From:')) ?></label>
+        <input type="date" name="from" value="<?= $block->escapeHtmlAttr($from) ?>" style="padding:6px; margin-right:16px;"/>
+        <label style="margin-right:8px; font-weight:bold;"><?= $block->escapeHtml(__('To:')) ?></label>
+        <input type="date" name="to" value="<?= $block->escapeHtmlAttr($to) ?>" style="padding:6px; margin-right:16px;"/>
+        <button type="submit" class="action-default" style="padding:6px 16px; cursor:pointer;">
+            <?= $block->escapeHtml(__('Apply')) ?>
+        </button>
+        <span style="margin-left:16px; color:#666;"><?= $block->escapeHtml(__('Showing data from %1 to %2', $from, $to)) ?></span>
+    </form>
+
+    <!-- KPI cards row -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin-bottom:24px;">
+
+        <?php foreach ([
+            ['label' => __('Abandoned Carts'),    'value' => (int) $summary['total_abandoned'],    'color' => '#666'],
+            ['label' => __('Recovered'),          'value' => (int) $summary['total_recovered'],    'color' => '#1f8c44'],
+            ['label' => __('Recovery Rate'),      'value' => $block->formatRate((float) $summary['recovery_rate']),    'color' => '#1f8c44'],
+            ['label' => __('Revenue Recovered'),  'value' => $block->formatCurrency((float) $summary['revenue_recovered']), 'color' => '#1f8c44'],
+            ['label' => __('Emails Sent'),        'value' => (int) $summary['emails_sent'],        'color' => '#1979c3'],
+            ['label' => __('Open Rate'),          'value' => $block->formatRate((float) $summary['open_rate']),        'color' => '#1979c3'],
+            ['label' => __('Click Rate'),         'value' => $block->formatRate((float) $summary['click_rate']),       'color' => '#1979c3'],
+            ['label' => __('Failed Sends'),       'value' => (int) $summary['emails_failed'],      'color' => '#c00'],
+        ] as $card): ?>
+            <div style="background:#fff; border:1px solid #ddd; border-radius:6px; padding:16px; text-align:center;">
+                <div style="font-size:12px; color:#666; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
+                    <?= $block->escapeHtml($card['label']) ?>
+                </div>
+                <div style="font-size:28px; font-weight:bold; color:<?= $block->escapeHtmlAttr($card['color']) ?>;">
+                    <?= $block->escapeHtml((string) $card['value']) ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
+
+    </div>
+
+    <!-- Per-rule breakdown -->
+    <h2 style="margin:0 0 12px; font-size:18px;"><?= $block->escapeHtml(__('Per-Rule Performance')) ?></h2>
+
+    <?php if (empty($perRule)): ?>
+        <p style="padding:16px; background:#f5f5f5; border-radius:6px; color:#666;">
+            <?= $block->escapeHtml(__('No rules to report on yet. Create at least one rule under Email Rules.')) ?>
+        </p>
+    <?php else: ?>
+        <table class="admin__table-secondary" style="width:100%; border-collapse:collapse; background:#fff; border:1px solid #ddd; border-radius:6px; overflow:hidden;">
+            <thead style="background:#f5f5f5;">
+                <tr>
+                    <th style="padding:10px; text-align:left;"><?= $block->escapeHtml(__('Rule')) ?></th>
+                    <th style="padding:10px; text-align:center;"><?= $block->escapeHtml(__('Active')) ?></th>
+                    <th style="padding:10px; text-align:center;"><?= $block->escapeHtml(__('Sequence')) ?></th>
+                    <th style="padding:10px; text-align:right;"><?= $block->escapeHtml(__('Sent')) ?></th>
+                    <th style="padding:10px; text-align:right;"><?= $block->escapeHtml(__('Opened')) ?></th>
+                    <th style="padding:10px; text-align:right;"><?= $block->escapeHtml(__('Clicked')) ?></th>
+                    <th style="padding:10px; text-align:right;"><?= $block->escapeHtml(__('Converted')) ?></th>
+                    <th style="padding:10px; text-align:right;"><?= $block->escapeHtml(__('Open Rate')) ?></th>
+                    <th style="padding:10px; text-align:right;"><?= $block->escapeHtml(__('Click Rate')) ?></th>
+                    <th style="padding:10px; text-align:right;"><?= $block->escapeHtml(__('Conversion Rate')) ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($perRule as $row): ?>
+                    <tr style="border-top:1px solid #eee;">
+                        <td style="padding:10px;"><?= $block->escapeHtml($row['rule_name']) ?></td>
+                        <td style="padding:10px; text-align:center;"><?= ((int) $row['is_active'] === 1) ? '✓' : '—' ?></td>
+                        <td style="padding:10px; text-align:center;"><?= (int) $row['sequence_number'] ?></td>
+                        <td style="padding:10px; text-align:right;"><?= (int) $row['sent'] ?></td>
+                        <td style="padding:10px; text-align:right;"><?= (int) $row['opened'] ?></td>
+                        <td style="padding:10px; text-align:right;"><?= (int) $row['clicked'] ?></td>
+                        <td style="padding:10px; text-align:right; color:#1f8c44; font-weight:bold;"><?= (int) $row['converted'] ?></td>
+                        <td style="padding:10px; text-align:right;"><?= $block->escapeHtml($block->formatRate((float) $row['open_rate'])) ?></td>
+                        <td style="padding:10px; text-align:right;"><?= $block->escapeHtml($block->formatRate((float) $row['click_rate'])) ?></td>
+                        <td style="padding:10px; text-align:right; color:#1f8c44; font-weight:bold;"><?= $block->escapeHtml($block->formatRate((float) $row['conversion_rate'])) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
+
+</div>

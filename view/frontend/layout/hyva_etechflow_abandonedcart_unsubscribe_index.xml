@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Hyvä layout for the unsubscribe confirmation page.
+ *
+ * Hyvä's compatibility module routes to the `hyva_*` handle when the
+ * active theme is Hyvä. Template uses Tailwind + Alpine, ViewModel-driven.
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd"
+      layout="1column">
+    <body>
+        <referenceContainer name="content">
+            <block name="etechflow.abandonedcart.unsubscribe.hyva"
+                   template="Etechflow_AbandonedCart::hyva/unsubscribe.phtml"
+                   cacheable="false">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">Etechflow\AbandonedCart\ViewModel\Unsubscribe</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

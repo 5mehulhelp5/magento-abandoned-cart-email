@@ -1,0 +1,104 @@
+{
+    "etechflow_abandoned_cart": {
+        "column": {
+            "entity_id": true,
+            "quote_id": true,
+            "store_id": true,
+            "customer_id": true,
+            "customer_email": true,
+            "customer_firstname": true,
+            "customer_lastname": true,
+            "customer_group_id": true,
+            "items_count": true,
+            "items_qty": true,
+            "subtotal": true,
+            "grand_total": true,
+            "currency_code": true,
+            "status": true,
+            "restore_token": true,
+            "emails_sent": true,
+            "last_email_sent_at": true,
+            "recovered_order_id": true,
+            "recovered_revenue": true,
+            "abandoned_at": true,
+            "recovered_at": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "ETECHFLOW_ABANDONED_CART_STATUS": true,
+            "ETECHFLOW_ABANDONED_CART_CUSTOMER_EMAIL": true,
+            "ETECHFLOW_ABANDONED_CART_CUSTOMER_ID": true,
+            "ETECHFLOW_ABANDONED_CART_ABANDONED_AT": true,
+            "ETECHFLOW_ABANDONED_CART_STORE_STATUS_ABANDONED": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ETECHFLOW_ABANDONED_CART_QUOTE_ID": true,
+            "ETECHFLOW_ABANDONED_CART_RESTORE_TOKEN": true,
+            "ETECHFLOW_AC_QUOTE_ID_QUOTE_ENTITY_ID": true,
+            "ETECHFLOW_AC_STORE_ID_STORE_STORE_ID": true,
+            "ETECHFLOW_AC_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID": true,
+            "ETECHFLOW_AC_RECOVERED_ORDER_ID_SALES_ORDER_ENTITY_ID": true
+        }
+    },
+    "etechflow_abandoned_cart_rule": {
+        "column": {
+            "rule_id": true,
+            "name": true,
+            "description": true,
+            "is_active": true,
+            "store_ids": true,
+            "customer_group_ids": true,
+            "send_after_minutes": true,
+            "sequence_number": true,
+            "email_template": true,
+            "email_sender": true,
+            "min_cart_subtotal": true,
+            "max_cart_subtotal": true,
+            "conditions_serialized": true,
+            "apply_to_guests": true,
+            "priority": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "ETECHFLOW_AC_RULE_IS_ACTIVE": true,
+            "ETECHFLOW_AC_RULE_PRIORITY": true,
+            "ETECHFLOW_AC_RULE_ACTIVE_PRIORITY_AFTER": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "etechflow_abandoned_cart_email_log": {
+        "column": {
+            "log_id": true,
+            "cart_id": true,
+            "rule_id": true,
+            "recipient_email": true,
+            "email_template": true,
+            "sequence_number": true,
+            "status": true,
+            "error_message": true,
+            "sent_at": true,
+            "opened_at": true,
+            "clicked_at": true,
+            "open_count": true,
+            "click_count": true,
+            "recovered_order_id": true,
+            "created_at": true
+        },
+        "index": {
+            "ETECHFLOW_AC_LOG_STATUS": true,
+            "ETECHFLOW_AC_LOG_SENT_AT": true,
+            "ETECHFLOW_AC_LOG_CART_SEQUENCE": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ETECHFLOW_AC_LOG_CART_ID_ABANDONED_CART_ENTITY_ID": true,
+            "ETECHFLOW_AC_LOG_RULE_ID_AC_RULE_RULE_ID": true,
+            "ETECHFLOW_AC_LOG_REC_ORDER_ID_SALES_ORDER_ENTITY_ID": true
+        }
+    }
+}

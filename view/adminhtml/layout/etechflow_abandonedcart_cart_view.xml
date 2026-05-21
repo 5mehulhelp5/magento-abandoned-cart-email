@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Admin per-cart detail layout.
+ *
+ * Minimal stub for v1.0.0. Detailed view (cart items, email history,
+ * Send Now button on this page rather than the grid) deferred — the
+ * registered cart object is in registry so future blocks can read it
+ * without extra controller changes.
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="styles"/>
+    <body>
+        <referenceContainer name="content">
+            <block class="Magento\Backend\Block\Template"
+                   name="etechflow.abandonedcart.cart.view"
+                   template="Etechflow_AbandonedCart::cart/view.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

@@ -1,0 +1,65 @@
+<?php
+/**
+ * Etechflow_AbandonedCart - Hyvä unsubscribe confirmation template.
+ *
+ * Tailwind utility classes + ViewModel-driven. No Knockout, no jQuery.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Etechflow\AbandonedCart\ViewModel\Unsubscribe $viewModel
+ */
+
+/** @var \Etechflow\AbandonedCart\ViewModel\Unsubscribe $viewModel */
+$viewModel = $block->getData('view_model');
+
+$success   = $viewModel->isSuccess();
+$firstname = $viewModel->getCustomerFirstname();
+$email     = $viewModel->getCustomerEmail();
+?>
+<div class="max-w-2xl mx-auto my-12 px-6 py-12 text-center">
+    <?php if ($success): ?>
+        <h1 class="text-3xl font-bold text-slate-900 mb-4">
+            <?= $block->escapeHtml(__('You\'ve been unsubscribed')) ?>
+        </h1>
+
+        <?php if ($firstname !== ''): ?>
+            <p class="text-lg text-slate-700 mb-3">
+                <?= $block->escapeHtml(__('Sorry to see you go, %1.', $firstname)) ?>
+            </p>
+        <?php endif; ?>
+
+        <p class="text-base text-slate-600 leading-relaxed mb-6">
+            <?php if ($email !== ''): ?>
+                <?= $block->escapeHtml(__('We won\'t send any more cart-recovery emails to %1.', $email)) ?>
+            <?php else: ?>
+                <?= $block->escapeHtml(__('We won\'t send any more cart-recovery emails to this address.')) ?>
+            <?php endif; ?>
+        </p>
+
+        <p class="text-sm text-slate-500 mb-8">
+            <?= $block->escapeHtml(__('Changed your mind? You can still browse our store any time — we just won\'t remind you about saved carts.')) ?>
+        </p>
+
+        <a href="<?= $block->escapeUrl($block->getBaseUrl()) ?>"
+           class="inline-block bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-8 rounded-lg transition-colors">
+            <?= $block->escapeHtml(__('Continue Shopping')) ?>
+        </a>
+
+    <?php else: ?>
+        <h1 class="text-2xl font-bold text-slate-900 mb-4">
+            <?= $block->escapeHtml(__('Unsubscribe link not recognized')) ?>
+        </h1>
+
+        <p class="text-base text-slate-600 leading-relaxed mb-6">
+            <?= $block->escapeHtml(__('We couldn\'t find a recovery record matching that link. It may have expired, been used already, or the URL was incomplete.')) ?>
+        </p>
+
+        <p class="text-sm text-slate-500 mb-8">
+            <?= $block->escapeHtml(__('If you keep receiving our emails and want to stop, please contact support and we\'ll handle it manually.')) ?>
+        </p>
+
+        <a href="<?= $block->escapeUrl($block->getBaseUrl()) ?>"
+           class="inline-block bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-8 rounded-lg transition-colors">
+            <?= $block->escapeHtml(__('Continue Shopping')) ?>
+        </a>
+    <?php endif; ?>
+</div>

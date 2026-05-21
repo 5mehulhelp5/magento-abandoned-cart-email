@@ -1,0 +1,35 @@
+# Etechflow_AbandonedCart - Git exclusions
+#
+# This module is a STANDALONE repo (not a Magento install), so the usual
+# vendor/ + var/ + generated/ exclusions don't apply — those folders never
+# exist inside a module's source tree.
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE noise
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# PHPUnit local artefacts
+.phpunit.cache/
+.phpunit.result.cache
+
+# Composer (we don't commit lock here — module is the dependency, not the install)
+vendor/
+
+# Local secret files (defensive — shouldn't exist in this repo, but if they
+# ever do, never accidentally commit them)
+*.local
+*.env
+auth.json
+
+# Distribution artefacts
+dist/
+*.zip
+*.tar.gz

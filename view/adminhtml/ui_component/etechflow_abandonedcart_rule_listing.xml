@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Rules grid UI Component.
+ *
+ * Marketing → ETechFlow Abandoned Cart → Email Rules.
+ * Default sort by priority ASC (lower priority = fires first).
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">etechflow_abandonedcart_rule_listing.etechflow_abandonedcart_rule_listing_data_source</item>
+        </item>
+    </argument>
+
+    <settings>
+        <buttons>
+            <button name="add">
+                <url path="*/*/new"/>
+                <class>primary</class>
+                <label translate="true">Add New Rule</label>
+            </button>
+        </buttons>
+        <spinner>etechflow_abandonedcart_rule_listing_columns</spinner>
+        <deps>
+            <dep>etechflow_abandonedcart_rule_listing.etechflow_abandonedcart_rule_listing_data_source</dep>
+        </deps>
+    </settings>
+
+    <dataSource name="etechflow_abandonedcart_rule_listing_data_source"
+                component="Magento_Ui/js/grid/provider">
+        <settings>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">rule_id</param>
+            </storageConfig>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <aclResource>Etechflow_AbandonedCart::rules</aclResource>
+        <dataProvider class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider"
+                      name="etechflow_abandonedcart_rule_listing_data_source">
+            <settings>
+                <requestFieldName>rule_id</requestFieldName>
+                <primaryFieldName>rule_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <listingToolbar name="listing_top">
+        <settings>
+            <sticky>true</sticky>
+        </settings>
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <filters name="listing_filters"/>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+
+    <columns name="etechflow_abandonedcart_rule_listing_columns">
+
+        <column name="rule_id" sortOrder="10">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">ID</label>
+                <sorting>asc</sorting>
+            </settings>
+        </column>
+
+        <column name="name" sortOrder="20">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Rule Name</label>
+            </settings>
+        </column>
+
+        <column name="is_active" component="Magento_Ui/js/grid/columns/select" sortOrder="30">
+            <settings>
+                <options class="Magento\Config\Model\Config\Source\Yesno"/>
+                <dataType>select</dataType>
+                <filter>select</filter>
+                <label translate="true">Active</label>
+            </settings>
+        </column>
+
+        <column name="sequence_number" sortOrder="40">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">Sequence #</label>
+            </settings>
+        </column>
+
+        <column name="send_after_minutes" sortOrder="50">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">Send After (min)</label>
+            </settings>
+        </column>
+
+        <column name="priority" sortOrder="60">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">Priority</label>
+                <sorting>asc</sorting>
+            </settings>
+        </column>
+
+        <column name="store_ids" sortOrder="70">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Store IDs</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+
+        <column name="created_at" class="Magento\Ui\Component\Listing\Columns\Date" sortOrder="80">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Created At</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+
+        <column name="updated_at" class="Magento\Ui\Component\Listing\Columns\Date" sortOrder="90">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Updated At</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+
+        <actionsColumn name="actions"
+                       class="Etechflow\AbandonedCart\Ui\Component\Listing\Column\RuleActions"
+                       sortOrder="200">
+            <settings>
+                <indexField>rule_id</indexField>
+                <resizeEnabled>false</resizeEnabled>
+                <resizeDefaultWidth>120</resizeDefaultWidth>
+            </settings>
+        </actionsColumn>
+
+    </columns>
+
+</listing>

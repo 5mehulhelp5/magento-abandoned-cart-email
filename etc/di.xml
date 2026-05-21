@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Global DI configuration.
+ *
+ * <preference> elements bind service-contract interfaces (Api/) to their
+ * concrete classes (Model/). Whenever any other class type-hints
+ * `AbandonedCartRepositoryInterface` etc., Magento's DI resolves to the
+ * mapped class here.
+ *
+ * Frontend-scoped overrides (ConfigProvider, LayoutProcessor plugins,
+ * frontend observers/routes) belong in etc/frontend/di.xml NOT here,
+ * per ETechFlow Module Development Standards §10. Global di.xml is for
+ * scope-agnostic bindings only.
+ *
+ * CLI command registration arrives with the Console commands in Phase 20.
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- Data interfaces → concrete Model classes -->
+    <preference for="Etechflow\AbandonedCart\Api\Data\AbandonedCartInterface"
+                type="Etechflow\AbandonedCart\Model\AbandonedCart"/>
+    <preference for="Etechflow\AbandonedCart\Api\Data\RuleInterface"
+                type="Etechflow\AbandonedCart\Model\Rule"/>
+    <preference for="Etechflow\AbandonedCart\Api\Data\EmailLogInterface"
+                type="Etechflow\AbandonedCart\Model\EmailLog"/>
+
+    <!-- Repository interfaces → concrete Repository classes -->
+    <preference for="Etechflow\AbandonedCart\Api\AbandonedCartRepositoryInterface"
+                type="Etechflow\AbandonedCart\Model\AbandonedCartRepository"/>
+    <preference for="Etechflow\AbandonedCart\Api\RuleRepositoryInterface"
+                type="Etechflow\AbandonedCart\Model\RuleRepository"/>
+    <preference for="Etechflow\AbandonedCart\Api\EmailLogRepositoryInterface"
+                type="Etechflow\AbandonedCart\Model\EmailLogRepository"/>
+
+    <!--
+       Plugin: catch order placement at the deepest level (QuoteManagement::submit)
+       as a defensive backup to the sales_order_place_after Observer. Both
+       paths converge on RecoveryService::markRecovered() which is idempotent
+       so firing twice is safe. See [[Etechflow\AbandonedCart\Plugin\Quote\SubmitPlugin]].
+    -->
+    <type name="Magento\Quote\Model\QuoteManagement">
+        <plugin name="etechflow_abandoned_cart_quote_submit"
+                type="Etechflow\AbandonedCart\Plugin\Quote\SubmitPlugin"
+                sortOrder="100"/>
+    </type>
+
+    <!--
+       CLI commands. After adding a new command, per §15:
+         rm -rf var/cache/* generated/* && bin/magento cache:flush
+       Magento's CommandList is heavily cached and won't see new entries
+       until those caches are blown away.
+    -->
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="etechflow_abc_verify"
+                      xsi:type="object">Etechflow\AbandonedCart\Console\Command\VerifyCommand</item>
+                <item name="etechflow_abc_perf"
+                      xsi:type="object">Etechflow\AbandonedCart\Console\Command\PerfCommand</item>
+                <item name="etechflow_abc_send"
+                      xsi:type="object">Etechflow\AbandonedCart\Console\Command\SendCommand</item>
+                <item name="etechflow_abc_cleanup"
+                      xsi:type="object">Etechflow\AbandonedCart\Console\Command\CleanupCommand</item>
+            </argument>
+        </arguments>
+    </type>
+
+</config>

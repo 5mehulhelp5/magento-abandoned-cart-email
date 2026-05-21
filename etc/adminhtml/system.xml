@@ -1,0 +1,254 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Admin configuration form.
+ *
+ * Lives at: Stores → Configuration → ETechFlow → Abandoned Cart Email.
+ *
+ * Every field's `comment` text is the tooltip the merchant sees. Per
+ * ETechFlow Module Development Standards §18 (plain-language), tooltips
+ * describe outcomes in customer-facing terms ("what does the customer
+ * experience if I change this") — not internals.
+ *
+ * All defaults in this form match etc/config.xml — single source of
+ * truth for default values. Changing one without the other creates
+ * confusion when merchants click "Use system value".
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+
+        <tab id="etechflow" translate="label" sortOrder="500">
+            <label>ETechFlow</label>
+        </tab>
+
+        <section id="etechflow_abandoned_cart"
+                 translate="label"
+                 type="text"
+                 sortOrder="10"
+                 showInDefault="1"
+                 showInWebsite="1"
+                 showInStore="1">
+            <label>Abandoned Cart Email</label>
+            <tab>etechflow</tab>
+            <resource>Etechflow_AbandonedCart::config</resource>
+
+            <!-- ============================================================ -->
+            <!-- General -->
+            <!-- ============================================================ -->
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General Settings</label>
+
+                <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Module</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Turn the whole extension on or off. When off, no emails are sent and no carts are tracked.</comment>
+                </field>
+
+                <field id="abandonment_threshold_minutes" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Cart Abandonment Threshold (minutes)</label>
+                    <validate>validate-number validate-greater-than-zero</validate>
+                    <comment>How long a cart must sit idle before we treat it as abandoned. 30 minutes is a good starting point — too short and you'll email shoppers who are still browsing, too long and you'll miss the recovery window.</comment>
+                </field>
+
+                <field id="debug" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Debug Mode</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>When on, the module writes verbose details to var/log/etechflow_abandoned_cart.log. Leave off in production.</comment>
+                </field>
+
+                <field id="test_mode" translate="label comment" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Test Mode</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>When on, ALL recovery emails are redirected to the Test Recipient Email below — the real customer never receives anything. Use this when previewing a rule before going live.</comment>
+                </field>
+
+                <field id="test_recipient_email" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Test Recipient Email</label>
+                    <comment>Where to send emails while Test Mode is on. Comma-separated for multiple inboxes (first one is used as primary).</comment>
+                    <depends>
+                        <field id="test_mode">1</field>
+                    </depends>
+                </field>
+            </group>
+
+            <!-- ============================================================ -->
+            <!-- Email -->
+            <!-- ============================================================ -->
+            <group id="email" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Email Sending</label>
+
+                <field id="sender_name" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sender Name</label>
+                    <comment>Shown as the "From" name when the customer receives the email.</comment>
+                </field>
+
+                <field id="sender_identity" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sender Identity</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Identity</source_model>
+                    <comment>Which Magento sender identity ("General Contact", "Sales", "Customer Support") to use. Set up identities in Stores → Configuration → General → Store Email Addresses.</comment>
+                </field>
+
+                <field id="reply_to" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Reply-To Email</label>
+                    <validate>validate-email</validate>
+                    <comment>Optional. If set, replies from customers go here instead of the sender identity's address.</comment>
+                </field>
+
+                <field id="bcc" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>BCC Email</label>
+                    <comment>Optional. Receive a copy of every recovery email — useful for monitoring during launch. Comma-separated for multiple. Leave empty in normal operation.</comment>
+                </field>
+
+                <field id="max_emails_per_cart" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Maximum Emails per Cart</label>
+                    <validate>validate-number validate-greater-than-zero</validate>
+                    <comment>How many reminders a single abandoned cart can ever receive. Stops the module from harassing the same customer with the same cart.</comment>
+                </field>
+
+                <field id="default_template" translate="label comment" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Default Email Template</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                    <comment>The template a rule uses when its own template field is left blank.</comment>
+                </field>
+            </group>
+
+            <!-- ============================================================ -->
+            <!-- Cart Restore -->
+            <!-- ============================================================ -->
+            <group id="restore" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Cart Restore</label>
+
+                <field id="token_expiry_days" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Restore Token Expiry (days)</label>
+                    <validate>validate-number validate-greater-than-zero</validate>
+                    <comment>Each recovery link contains a one-time token. After this many days, the link stops working. Longer = more conversions, shorter = more secure.</comment>
+                </field>
+
+                <field id="auto_login_customer" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Auto-Login Customer on Restore</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>When a logged-in customer clicks their recovery link, log them straight back in. Guests are not affected.</comment>
+                </field>
+
+                <field id="merge_with_existing_cart" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Merge with Existing Cart</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>If the customer has already built a new cart in the meantime, this merges the recovered items into it. When off, the recovered cart replaces the new one.</comment>
+                </field>
+            </group>
+
+            <!-- ============================================================ -->
+            <!-- Tracking -->
+            <!-- ============================================================ -->
+            <group id="tracking" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Tracking</label>
+
+                <field id="enable_open_tracking" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Open Tracking</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Embeds a tiny invisible image in every email so we can tell when it gets opened.</comment>
+                </field>
+
+                <field id="enable_click_tracking" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Click Tracking</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Wraps every link in the email so we can record clicks. Required to attribute recovered orders back to specific emails.</comment>
+                </field>
+
+                <field id="utm_source" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>UTM Source</label>
+                    <comment>Added to every link as ?utm_source=... for Google Analytics.</comment>
+                </field>
+
+                <field id="utm_medium" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>UTM Medium</label>
+                </field>
+
+                <field id="utm_campaign" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>UTM Campaign</label>
+                </field>
+            </group>
+
+            <!-- ============================================================ -->
+            <!-- Cron / Processing -->
+            <!-- ============================================================ -->
+            <group id="cron" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Cron / Processing</label>
+
+                <field id="batch_size" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Batch Size</label>
+                    <validate>validate-number validate-greater-than-zero</validate>
+                    <comment>How many carts to process per cron tick. Larger batches finish faster but spike server load. Magento's default cron runs every 5 minutes, so 50 ≈ 600 carts/hour.</comment>
+                </field>
+
+                <field id="lock_timeout_minutes" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Lock Timeout (minutes)</label>
+                    <validate>validate-number validate-greater-than-zero</validate>
+                    <comment>Safety net — if the cron crashes mid-run, the lock auto-releases after this many minutes so the next tick can take over.</comment>
+                </field>
+
+                <field id="max_runtime_seconds" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Maximum Runtime (seconds)</label>
+                    <validate>validate-number validate-greater-than-zero</validate>
+                    <comment>The cron stops itself after this many seconds to leave room for Magento's other cron jobs.</comment>
+                </field>
+            </group>
+
+            <!-- ============================================================ -->
+            <!-- Cleanup -->
+            <!-- ============================================================ -->
+            <group id="cleanup" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Cleanup &amp; Retention</label>
+
+                <field id="log_retention_days" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Email Log Retention (days)</label>
+                    <validate>validate-number validate-greater-than-zero</validate>
+                    <comment>Old email send logs are deleted after this. Keep enough to fill your reporting window — 6 months by default.</comment>
+                </field>
+
+                <field id="expired_cart_retention_days" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Expired Cart Retention (days)</label>
+                    <validate>validate-number validate-greater-than-zero</validate>
+                    <comment>Carts that are abandoned but never recovered get deleted after this. The original quote row in Magento stays untouched — only our tracking row goes.</comment>
+                </field>
+            </group>
+
+            <!-- ============================================================ -->
+            <!-- Hyvä compatibility -->
+            <!-- ============================================================ -->
+            <group id="hyva" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Hyvä Compatibility</label>
+
+                <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Use Hyvä-Compatible Email Templates</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>When you're running the Hyvä theme, send emails with the Hyvä-styled templates (Tailwind-inspired, no Knockout). When you're on Luma, this is ignored.</comment>
+                </field>
+            </group>
+
+            <!-- ============================================================ -->
+            <!-- License -->
+            <!-- ============================================================ -->
+            <group id="license" translate="label" type="text" sortOrder="80" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>License</label>
+
+                <field id="key" translate="label comment" type="textarea" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>License Key</label>
+                    <comment><![CDATA[Paste the license key you received after purchase. The module silently disables itself if this is wrong or missing. Development hosts (.test, .local, .docksal, .ddev, .lando, localhost, 127.0.0.1) bypass this automatically.]]></comment>
+                </field>
+
+                <field id="is_production" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Production Environment</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>When set to No, license checks are skipped for development.</comment>
+                </field>
+            </group>
+
+        </section>
+    </system>
+</config>

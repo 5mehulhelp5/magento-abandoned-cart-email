@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Luma layout for the unsubscribe confirmation page.
+ *
+ * Handle name matches Magento's auto-generated route_controller_action
+ * format (`etechflow_abandonedcart_unsubscribe_index`) so the
+ * UnsubscribeController's PageFactory result automatically loads it.
+ *
+ * The Hyvä variant lives in hyva_etechflow_abandonedcart_unsubscribe_index.xml.
+ * Hyvä compatibility module routes the request to whichever handle is
+ * active for the current theme — both files can coexist on disk.
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd"
+      layout="1column">
+    <body>
+        <referenceContainer name="content">
+            <block class="Etechflow\AbandonedCart\Block\Unsubscribe"
+                   name="etechflow.abandonedcart.unsubscribe"
+                   template="Etechflow_AbandonedCart::unsubscribe.phtml"
+                   cacheable="false"/>
+        </referenceContainer>
+    </body>
+</page>

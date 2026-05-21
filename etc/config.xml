@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Module default configuration.
+ *
+ * These defaults are loaded into core_config_data on `setup:upgrade` and
+ * are overridable per-website / per-store from Stores > Configuration.
+ *
+ * Conventions:
+ *   - All paths under `etechflow_abandoned_cart/<group>/<field>`
+ *   - Booleans stored as "1" / "0" (Magento yes/no source model)
+ *   - Time values: minutes for hot-path runtime values, days for retention
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <etechflow_abandoned_cart>
+
+            <general>
+                <enabled>1</enabled>
+                <abandonment_threshold_minutes>30</abandonment_threshold_minutes>
+                <debug>0</debug>
+                <test_mode>0</test_mode>
+                <test_recipient_email></test_recipient_email>
+            </general>
+
+            <email>
+                <sender_name>General Contact</sender_name>
+                <sender_identity>general</sender_identity>
+                <reply_to></reply_to>
+                <bcc></bcc>
+                <max_emails_per_cart>3</max_emails_per_cart>
+                <default_template>etechflow_abandoned_cart_default_template</default_template>
+            </email>
+
+            <restore>
+                <token_expiry_days>30</token_expiry_days>
+                <auto_login_customer>1</auto_login_customer>
+                <merge_with_existing_cart>1</merge_with_existing_cart>
+            </restore>
+
+            <tracking>
+                <enable_open_tracking>1</enable_open_tracking>
+                <enable_click_tracking>1</enable_click_tracking>
+                <utm_source>etechflow_abandoned_cart</utm_source>
+                <utm_medium>email</utm_medium>
+                <utm_campaign>cart_recovery</utm_campaign>
+            </tracking>
+
+            <cron>
+                <batch_size>50</batch_size>
+                <lock_timeout_minutes>15</lock_timeout_minutes>
+                <max_runtime_seconds>240</max_runtime_seconds>
+            </cron>
+
+            <cleanup>
+                <log_retention_days>180</log_retention_days>
+                <expired_cart_retention_days>90</expired_cart_retention_days>
+            </cleanup>
+
+            <hyva>
+                <enabled>1</enabled>
+            </hyva>
+
+            <license>
+                <key></key>
+                <is_production>1</is_production>
+            </license>
+
+        </etechflow_abandoned_cart>
+    </default>
+</config>

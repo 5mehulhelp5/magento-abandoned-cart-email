@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Admin menu wiring.
+ *
+ * Places "ETechFlow Abandoned Cart" under the existing Marketing menu so
+ * merchants find it next to other revenue-recovery tools (Newsletter,
+ * Promotions, Email Templates) rather than buried under our own top-level
+ * heading.
+ *
+ * Submenu order:
+ *   - Abandoned Carts (10)   — the live tracking grid (most-used)
+ *   - Email Rules (20)       — admin-managed sequence configuration
+ *   - Reports (30)           — recovery dashboard
+ *   - Configuration (40)     — deep link to the system.xml section
+ *
+ * Submenu controllers (Phase 16-18) live at Controller/Adminhtml/<Name>/
+ * — they 404 until those phases ship. The menu items themselves still
+ * render; clicking just gives a "controller not found" until the backend
+ * is built. Merchants can navigate to System Config immediately because
+ * that submenu deep-links to the standard Magento config editor.
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+
+        <add id="Etechflow_AbandonedCart::main"
+             title="ETechFlow Abandoned Cart"
+             module="Etechflow_AbandonedCart"
+             sortOrder="50"
+             parent="Magento_Backend::marketing"
+             resource="Etechflow_AbandonedCart::main"/>
+
+        <add id="Etechflow_AbandonedCart::carts"
+             title="Abandoned Carts"
+             module="Etechflow_AbandonedCart"
+             sortOrder="10"
+             parent="Etechflow_AbandonedCart::main"
+             action="etechflow_abandonedcart/cart/index"
+             resource="Etechflow_AbandonedCart::carts"/>
+
+        <add id="Etechflow_AbandonedCart::rules"
+             title="Email Rules"
+             module="Etechflow_AbandonedCart"
+             sortOrder="20"
+             parent="Etechflow_AbandonedCart::main"
+             action="etechflow_abandonedcart/rule/index"
+             resource="Etechflow_AbandonedCart::rules"/>
+
+        <add id="Etechflow_AbandonedCart::reports"
+             title="Reports"
+             module="Etechflow_AbandonedCart"
+             sortOrder="30"
+             parent="Etechflow_AbandonedCart::main"
+             action="etechflow_abandonedcart/report/index"
+             resource="Etechflow_AbandonedCart::reports"/>
+
+        <add id="Etechflow_AbandonedCart::config_link"
+             title="Configuration"
+             module="Etechflow_AbandonedCart"
+             sortOrder="40"
+             parent="Etechflow_AbandonedCart::main"
+             action="adminhtml/system_config/edit/section/etechflow_abandoned_cart"
+             resource="Etechflow_AbandonedCart::config"/>
+
+    </menu>
+</config>

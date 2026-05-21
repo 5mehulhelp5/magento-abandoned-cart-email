@@ -1,0 +1,71 @@
+<?php
+/**
+ * Etechflow_AbandonedCart - Cart-items email partial.
+ *
+ * Embedded inside abandoned-cart email templates via:
+ *   {{block class="Etechflow\AbandonedCart\Block\Email\CartItems"
+ *           area="frontend"
+ *           template="Etechflow_AbandonedCart::email/cart_items.phtml"
+ *           cart=$cart}}
+ *
+ * Table-based layout because email clients (especially Outlook + Gmail
+ * web) strip <style> and don't reliably support flexbox/grid. Inline
+ * CSS only — see ETechFlow Module Development Standards §22 (inline
+ * style exception for emails).
+ *
+ * @var \Etechflow\AbandonedCart\Block\Email\CartItems $block
+ */
+
+$items = $block->getQuoteItems();
+if (empty($items)) {
+    return;
+}
+?>
+<table cellpadding="0" cellspacing="0" border="0" width="100%"
+       style="border-collapse:collapse; margin:16px 0; font-family:Arial,Helvetica,sans-serif; font-size:14px; color:#333;">
+    <thead>
+        <tr style="background-color:#f5f5f5; border-bottom:2px solid #ddd;">
+            <th style="padding:10px; text-align:left;"><?= /* @noEscape */ __('Item') ?></th>
+            <th style="padding:10px; text-align:center; width:60px;"><?= /* @noEscape */ __('Qty') ?></th>
+            <th style="padding:10px; text-align:right; width:100px;"><?= /* @noEscape */ __('Subtotal') ?></th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($items as $item): ?>
+            <?php
+            $imgUrl  = $block->getProductImageUrl($item);
+            $name    = (string) $item->getName();
+            $qty     = (int) $item->getQty();
+            $price   = (float) $item->getPrice();
+            $rowSub  = $price * $qty;
+            ?>
+            <tr style="border-bottom:1px solid #eee;">
+                <td style="padding:12px 10px; vertical-align:top;">
+                    <table cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                            <?php if ($imgUrl !== ''): ?>
+                                <td style="padding-right:12px; vertical-align:top;">
+                                    <img src="<?= $block->escapeUrl($imgUrl) ?>"
+                                         alt="<?= $block->escapeHtmlAttr($name) ?>"
+                                         width="60"
+                                         style="display:block; border:0; border-radius:4px;"/>
+                                </td>
+                            <?php endif; ?>
+                            <td style="vertical-align:top;">
+                                <strong style="color:#222;">
+                                    <?= $block->escapeHtml($name) ?>
+                                </strong>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="padding:12px 10px; text-align:center; vertical-align:top;">
+                    <?= $qty ?>
+                </td>
+                <td style="padding:12px 10px; text-align:right; vertical-align:top; white-space:nowrap;">
+                    <?= $block->escapeHtml($block->formatPrice($rowSub)) ?>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>

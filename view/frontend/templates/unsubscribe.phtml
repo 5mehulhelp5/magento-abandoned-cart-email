@@ -1,0 +1,68 @@
+<?php
+/**
+ * Etechflow_AbandonedCart - Luma unsubscribe confirmation template.
+ *
+ * Renders one of two states based on whether the controller found and
+ * updated a cart row:
+ *   - success: friendly "you've been unsubscribed" with the customer's
+ *     name + email visible (so they know what they unsubscribed from)
+ *   - failure: "we couldn't find that link" — token expired, malformed,
+ *     or the cart was already cleaned up
+ *
+ * @var \Etechflow\AbandonedCart\Block\Unsubscribe $block
+ */
+
+$success   = $block->isSuccess();
+$firstname = $block->getCustomerFirstname();
+$email     = $block->getCustomerEmail();
+?>
+<div class="etechflow-unsubscribe" style="max-width:640px; margin:40px auto; padding:32px; text-align:center;">
+    <?php if ($success): ?>
+        <h1 style="font-size:28px; margin:0 0 16px; color:#222;">
+            <?= $block->escapeHtml(__('You\'ve been unsubscribed')) ?>
+        </h1>
+
+        <?php if ($firstname !== ''): ?>
+            <p style="font-size:16px; color:#444; margin:0 0 12px;">
+                <?= $block->escapeHtml(__('Sorry to see you go, %1.', $firstname)) ?>
+            </p>
+        <?php endif; ?>
+
+        <p style="font-size:15px; color:#555; line-height:1.5; margin:0 0 24px;">
+            <?php if ($email !== ''): ?>
+                <?= $block->escapeHtml(__('We won\'t send any more cart-recovery emails to %1.', $email)) ?>
+            <?php else: ?>
+                <?= $block->escapeHtml(__('We won\'t send any more cart-recovery emails to this address.')) ?>
+            <?php endif; ?>
+        </p>
+
+        <p style="font-size:14px; color:#777; margin:0 0 24px;">
+            <?= $block->escapeHtml(__('Changed your mind? You can still browse our store any time — we just won\'t remind you about saved carts.')) ?>
+        </p>
+
+        <a href="<?= $block->escapeUrl($block->getBaseUrl()) ?>"
+           class="action primary"
+           style="display:inline-block; padding:12px 28px; background-color:#1979c3; color:#ffffff; text-decoration:none; font-weight:bold; border-radius:4px;">
+            <?= $block->escapeHtml(__('Continue Shopping')) ?>
+        </a>
+
+    <?php else: ?>
+        <h1 style="font-size:24px; margin:0 0 16px; color:#222;">
+            <?= $block->escapeHtml(__('Unsubscribe link not recognized')) ?>
+        </h1>
+
+        <p style="font-size:15px; color:#555; line-height:1.5; margin:0 0 24px;">
+            <?= $block->escapeHtml(__('We couldn\'t find a recovery record matching that link. It may have expired, been used already, or the URL was incomplete.')) ?>
+        </p>
+
+        <p style="font-size:14px; color:#777; margin:0 0 24px;">
+            <?= $block->escapeHtml(__('If you keep receiving our emails and want to stop, please contact support and we\'ll handle it manually.')) ?>
+        </p>
+
+        <a href="<?= $block->escapeUrl($block->getBaseUrl()) ?>"
+           class="action primary"
+           style="display:inline-block; padding:12px 28px; background-color:#1979c3; color:#ffffff; text-decoration:none; font-weight:bold; border-radius:4px;">
+            <?= $block->escapeHtml(__('Continue Shopping')) ?>
+        </a>
+    <?php endif; ?>
+</div>

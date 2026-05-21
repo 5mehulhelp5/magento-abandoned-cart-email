@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Email template registry.
+ *
+ * Magento's email system looks up templates by identifier (id="..."). The
+ * `file=""` attribute points at the static .html template in view/base/email/.
+ *
+ * Three templates ship with v1.0.0:
+ *   1. etechflow_abandoned_cart_default_template — Luma-styled reminder
+ *      (the default the merchant gets if a rule's email_template is left
+ *      blank).
+ *   2. etechflow_abandoned_cart_hyva_template — Hyvä-styled variant for
+ *      merchants on the Hyvä theme who want a cleaner aesthetic.
+ *   3. etechflow_abandoned_cart_with_coupon_template — same Luma layout
+ *      plus a prominent coupon-code block, used when a rule has its
+ *      coupon-generator enabled.
+ *
+ * Merchants can clone any of these in Admin → Marketing → Email Templates
+ * to start from a working copy and customize freely without touching code.
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Email:etc/email_templates.xsd">
+
+    <template id="etechflow_abandoned_cart_default_template"
+              label="ETechFlow Abandoned Cart — Default Reminder"
+              file="abandoned_cart_default.html"
+              type="html"
+              module="Etechflow_AbandonedCart"
+              area="frontend"/>
+
+    <template id="etechflow_abandoned_cart_hyva_template"
+              label="ETechFlow Abandoned Cart — Hyvä-Styled Reminder"
+              file="abandoned_cart_hyva.html"
+              type="html"
+              module="Etechflow_AbandonedCart"
+              area="frontend"/>
+
+    <template id="etechflow_abandoned_cart_with_coupon_template"
+              label="ETechFlow Abandoned Cart — Reminder With Discount Coupon"
+              file="abandoned_cart_with_coupon.html"
+              type="html"
+              module="Etechflow_AbandonedCart"
+              area="frontend"/>
+
+</config>

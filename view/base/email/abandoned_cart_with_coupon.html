@@ -1,0 +1,92 @@
+<!--@subject {{trans "Don't miss out — your cart is waiting (with a discount inside)"}} @-->
+<!--@vars {
+    "var customer_firstname":"Customer First Name",
+    "var cart":"Abandoned Cart Record",
+    "var restore_url":"One-Click Cart Restore URL",
+    "var unsubscribe_url":"Unsubscribe URL",
+    "var tracking_pixel_url":"Open-Tracking Pixel URL",
+    "var coupon_code":"One-Time Discount Code",
+    "var coupon_label":"Human-Readable Coupon Description",
+    "var store.frontend_name":"Store Name"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+<table cellpadding="0" cellspacing="0" border="0" width="100%"
+       style="background:#ffffff; font-family:Arial,Helvetica,sans-serif; color:#333; font-size:14px; line-height:1.5;">
+    <tr>
+        <td style="padding:24px;">
+
+            <h1 style="margin:0 0 16px; font-size:24px; color:#222; font-weight:bold;">
+                {{depend customer_firstname}}{{trans "Hi %name," name=$customer_firstname}}{{/depend}}
+                {{ifnot customer_firstname}}{{trans "Hello,"}}{{/ifnot}}
+            </h1>
+
+            <p style="margin:0 0 16px;">
+                {{trans "You left items in your cart at %store_name — and we'd love to win you back. Here's a one-time discount, just for you:" store_name=$store.frontend_name}}
+            </p>
+
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:16px 0 24px;">
+                <tr>
+                    <td align="center"
+                        style="background:#fff7e6; border:2px dashed #ff9800; padding:20px; border-radius:6px;">
+                        <p style="margin:0 0 6px; color:#666; font-size:13px; text-transform:uppercase; letter-spacing:1px;">
+                            {{trans "Your discount code"}}
+                        </p>
+                        <p style="margin:0; font-size:24px; font-weight:bold; color:#222; letter-spacing:2px; font-family:'Courier New',monospace;">
+                            {{var coupon_code}}
+                        </p>
+                        {{depend coupon_label}}
+                        <p style="margin:6px 0 0; font-size:13px; color:#777;">
+                            {{var coupon_label}}
+                        </p>
+                        {{/depend}}
+                    </td>
+                </tr>
+            </table>
+
+            {{block class="Etechflow\\AbandonedCart\\Block\\Email\\CartItems"
+                    area="frontend"
+                    template="Etechflow_AbandonedCart::email/cart_items.phtml"
+                    cart=$cart}}
+
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:24px 0;">
+                <tr>
+                    <td align="center">
+                        <a href="{{var restore_url}}"
+                           style="display:inline-block; padding:14px 32px; background-color:#1979c3; color:#ffffff; text-decoration:none; font-weight:bold; border-radius:4px; font-size:16px;">
+                            {{trans "Claim Your Discount"}}
+                        </a>
+                    </td>
+                </tr>
+            </table>
+
+            <p style="margin:24px 0 0; color:#666; font-size:13px;">
+                {{trans "The code above is single-use and applies automatically when you click the button. If the button doesn't work, copy this link:"}}
+                <br/>
+                <a href="{{var restore_url}}" style="color:#1979c3; word-break:break-all;">{{var restore_url}}</a>
+            </p>
+
+        </td>
+    </tr>
+</table>
+
+<table cellpadding="0" cellspacing="0" border="0" width="100%"
+       style="background:#f5f5f5; font-family:Arial,Helvetica,sans-serif; font-size:12px; color:#888;">
+    <tr>
+        <td style="padding:20px 24px; text-align:center;">
+            <p style="margin:0 0 8px;">
+                {{trans "You received this email because you started a purchase at %store_name." store_name=$store.frontend_name}}
+            </p>
+            <p style="margin:0;">
+                <a href="{{var unsubscribe_url}}" style="color:#888; text-decoration:underline;">{{trans "Unsubscribe"}}</a>
+            </p>
+        </td>
+    </tr>
+</table>
+
+{{depend tracking_pixel_url}}
+<img src="{{var tracking_pixel_url}}" width="1" height="1" alt="" style="display:block; border:0;" />
+{{/depend}}
+
+{{template config_path="design/email/footer_template"}}
