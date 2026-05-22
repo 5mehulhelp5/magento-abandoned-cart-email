@@ -18,8 +18,7 @@
         <td style="padding:24px;">
 
             <h1 style="margin:0 0 16px; font-size:24px; color:#222; font-weight:bold;">
-                {{depend customer_firstname}}{{trans "Hi %name," name=$customer_firstname}}{{/depend}}
-                {{ifnot customer_firstname}}{{trans "Hello,"}}{{/ifnot}}
+                {{if customer_firstname}}{{trans "Hi %name," name=$customer_firstname}}{{else}}{{trans "Hello,"}}{{/if}}
             </h1>
 
             <p style="margin:0 0 16px;">
