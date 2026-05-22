@@ -25,6 +25,23 @@ class EmailLog extends AbstractModel implements EmailLogInterface
         $this->_init(EmailLogResource::class);
     }
 
+    /**
+     * See AbandonedCart::getCustomAttributes() - same DataProvider compat shim.
+     *
+     * @return \Magento\Framework\Api\AttributeValue[]
+     */
+    public function getCustomAttributes(): array
+    {
+        $attributes = [];
+        foreach ($this->getData() as $code => $value) {
+            $attr = new \Magento\Framework\Api\AttributeValue();
+            $attr->setAttributeCode((string) $code);
+            $attr->setValue($value);
+            $attributes[] = $attr;
+        }
+        return $attributes;
+    }
+
     public function getLogId(): ?int
     {
         $value = $this->getData(self::LOG_ID);

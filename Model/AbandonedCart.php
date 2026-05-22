@@ -33,6 +33,28 @@ class AbandonedCart extends AbstractModel implements AbandonedCartInterface
         $this->_init(AbandonedCartResource::class);
     }
 
+    /**
+     * Synthesize custom-attributes array from raw model data so Magento's
+     * UI Component DataProvider (which calls $item->getCustomAttributes() in
+     * searchResultToOutput at DataProvider.php:254) can iterate cleanly. Our
+     * Models extend AbstractModel rather than AbstractExtensibleModel, so the
+     * method isn't natively present — without this, admin grid pages throw
+     * "foreach() argument must be of type array|object, null given".
+     *
+     * @return \Magento\Framework\Api\AttributeValue[]
+     */
+    public function getCustomAttributes(): array
+    {
+        $attributes = [];
+        foreach ($this->getData() as $code => $value) {
+            $attr = new \Magento\Framework\Api\AttributeValue();
+            $attr->setAttributeCode((string) $code);
+            $attr->setValue($value);
+            $attributes[] = $attr;
+        }
+        return $attributes;
+    }
+
     public function getEntityId(): ?int
     {
         $value = $this->getData(self::ENTITY_ID);

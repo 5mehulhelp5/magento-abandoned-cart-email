@@ -204,7 +204,7 @@
             <formElements>
                 <select>
                     <settings>
-                        <options class="Magento\Config\Model\Config\Source\Email\Template"/>
+                        <options class="Etechflow\AbandonedCart\Model\Source\EmailTemplate"/>
                     </settings>
                 </select>
             </formElements>

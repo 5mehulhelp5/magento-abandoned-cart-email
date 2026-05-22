@@ -112,7 +112,7 @@
 
                 <field id="default_template" translate="label comment" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Default Email Template</label>
-                    <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                    <source_model>Etechflow\AbandonedCart\Model\Source\EmailTemplate</source_model>
                     <comment>The template a rule uses when its own template field is left blank.</comment>
                 </field>
             </group>
