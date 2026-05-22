@@ -25,7 +25,7 @@ declare(strict_types=1);
 
 namespace Etechflow\AbandonedCart\Model;
 
-use Magento\Framework\Filesystem\DirectoryList;
+use Magento\Framework\App\Filesystem\DirectoryList;
 use Psr\Log\LoggerInterface;
 
 class CronLock
