@@ -82,13 +82,13 @@ class VerifyCommand extends Command
         $cleanupLogId  = null;
 
         try {
-            $this->run($output, 1, 'Module enabled', function (): void {
+            $this->runStep($output, 1, 'Module enabled', function (): void {
                 if (!$this->moduleManager->isEnabled(self::MODULE_NAME)) {
                     throw new \RuntimeException('Module is not enabled in Magento.');
                 }
             }, $passed, $failed);
 
-            $this->run($output, 2, 'DB tables present (3)', function (): void {
+            $this->runStep($output, 2, 'DB tables present (3)', function (): void {
                 $conn = $this->resource->getConnection();
                 foreach (['etechflow_abandoned_cart', 'etechflow_abandoned_cart_rule', 'etechflow_abandoned_cart_email_log'] as $t) {
                     if (!$conn->isTableExists($this->resource->getTableName($t))) {
@@ -97,28 +97,28 @@ class VerifyCommand extends Command
                 }
             }, $passed, $failed);
 
-            $this->run($output, 3, 'Config wrapper readable', function (): void {
+            $this->runStep($output, 3, 'Config wrapper readable', function (): void {
                 $threshold = $this->config->getAbandonmentThresholdMinutes();
                 if ($threshold <= 0) {
                     throw new \RuntimeException('Threshold misconfigured: ' . $threshold);
                 }
             }, $passed, $failed);
 
-            $this->run($output, 4, 'LicenseValidator works', function (): void {
+            $this->runStep($output, 4, 'LicenseValidator works', function (): void {
                 $valid = $this->licenseValidator->isValid();
                 if (!is_bool($valid)) {
                     throw new \RuntimeException('LicenseValidator did not return bool.');
                 }
             }, $passed, $failed);
 
-            $this->run($output, 5, 'RuleRepository lists rules', function (): void {
+            $this->runStep($output, 5, 'RuleRepository lists rules', function (): void {
                 $rules = $this->ruleRepo->getAll();
                 if (!is_array($rules)) {
                     throw new \RuntimeException('getAll() did not return array.');
                 }
             }, $passed, $failed);
 
-            $this->run($output, 6, 'Source models return options', function (): void {
+            $this->runStep($output, 6, 'Source models return options', function (): void {
                 if (count($this->cartStatusSource->toOptionArray()) !== 5) {
                     throw new \RuntimeException('CartStatus expected 5 options.');
                 }
@@ -127,7 +127,7 @@ class VerifyCommand extends Command
                 }
             }, $passed, $failed);
 
-            $this->run($output, 7, 'AbandonedCart repo round-trip', function () use (&$cleanupCartId): void {
+            $this->runStep($output, 7, 'AbandonedCart repo round-trip', function () use (&$cleanupCartId): void {
                 $cart = $this->cartFactory->create();
                 $cart->setQuoteId(999999999);
                 $cart->setStoreId(1);
@@ -151,7 +151,7 @@ class VerifyCommand extends Command
                 }
             }, $passed, $failed);
 
-            $this->run($output, 8, 'EmailLog repo round-trip', function () use ($cleanupCartId, &$cleanupLogId): void {
+            $this->runStep($output, 8, 'EmailLog repo round-trip', function () use ($cleanupCartId, &$cleanupLogId): void {
                 if ($cleanupCartId === null) {
                     throw new \RuntimeException('Step 7 prerequisite missing.');
                 }
@@ -173,7 +173,7 @@ class VerifyCommand extends Command
                 }
             }, $passed, $failed);
 
-            $this->run($output, 9, 'Profiler no-op safe', function (): void {
+            $this->runStep($output, 9, 'Profiler no-op safe', function (): void {
                 $span = Profiler::start('Etechflow_ABC_VerifySmokeTest');
                 Profiler::stop($span);
             }, $passed, $failed);
@@ -192,7 +192,7 @@ class VerifyCommand extends Command
         return Command::FAILURE;
     }
 
-    private function run(OutputInterface $output, int $step, string $label, callable $check, int &$passed, int &$failed): void
+    private function runStep(OutputInterface $output, int $step, string $label, callable $check, int &$passed, int &$failed): void
     {
         try {
             $check();
