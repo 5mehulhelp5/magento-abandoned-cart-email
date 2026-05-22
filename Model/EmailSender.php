@@ -37,6 +37,8 @@ use Etechflow\AbandonedCart\Api\AbandonedCartRepositoryInterface;
 use Etechflow\AbandonedCart\Api\Data\EmailLogInterface;
 use Etechflow\AbandonedCart\Api\EmailLogRepositoryInterface;
 use Etechflow\AbandonedCart\Model\Performance\Profiler;
+use Magento\Framework\App\Area;
+use Magento\Framework\App\State as AppState;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Store\Model\ScopeInterface;
@@ -51,6 +53,7 @@ class EmailSender
         private readonly EmailLogRepositoryInterface $emailLogRepo,
         private readonly EmailVariableBuilder $variableBuilder,
         private readonly TransportBuilder $transportBuilder,
+        private readonly AppState $appState,
         private readonly DateTime $dateTime,
         private readonly LoggerInterface $logger,
     ) {
@@ -62,6 +65,24 @@ class EmailSender
             return false;
         }
 
+        // Magento's TransportBuilder needs to know the rendering area for
+        // template + theme resolution. CLI / cron contexts default to
+        // 'crontab' or 'global' — emails fail with "Area code is not set".
+        // emulateAreaCode() scopes the change to just our send call without
+        // mutating the caller's state.
+        try {
+            return $this->appState->emulateAreaCode(
+                Area::AREA_FRONTEND,
+                fn() => $this->doSend($log)
+            );
+        } catch (\Throwable $e) {
+            $this->markFailed($log, $e);
+            return false;
+        }
+    }
+
+    private function doSend(EmailLogInterface $log): bool
+    {
         $span = Profiler::start('Etechflow_ABC_EmailSend');
 
         try {
@@ -75,7 +96,7 @@ class EmailSender
             $this->transportBuilder
                 ->setTemplateIdentifier($log->getEmailTemplate())
                 ->setTemplateOptions([
-                    'area'  => \Magento\Framework\App\Area::AREA_FRONTEND,
+                    'area'  => Area::AREA_FRONTEND,
                     'store' => $storeId,
                 ])
                 ->setTemplateVars($variables)
