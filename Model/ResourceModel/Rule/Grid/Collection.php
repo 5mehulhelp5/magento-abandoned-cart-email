@@ -15,16 +15,23 @@ namespace Etechflow\AbandonedCart\Model\ResourceModel\Rule\Grid;
 use Etechflow\AbandonedCart\Model\ResourceModel\Rule\Collection as RuleCollection;
 use Magento\Framework\Api\Search\AggregationInterface;
 use Magento\Framework\Api\Search\SearchResultInterface;
+use Magento\Framework\Search\Response\Aggregation;
 
 class Collection extends RuleCollection implements SearchResultInterface
 {
     /**
-     * @var AggregationInterface
+     * @var AggregationInterface|null
      */
     protected $aggregations;
 
+    /**
+     * See AbandonedCart\Grid\Collection — same fix.
+     */
     public function getAggregations(): AggregationInterface
     {
+        if ($this->aggregations === null) {
+            $this->aggregations = new Aggregation([]);
+        }
         return $this->aggregations;
     }
 

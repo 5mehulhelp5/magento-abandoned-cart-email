@@ -17,16 +17,25 @@ namespace Etechflow\AbandonedCart\Model\ResourceModel\AbandonedCart\Grid;
 use Etechflow\AbandonedCart\Model\ResourceModel\AbandonedCart\Collection as AbandonedCartCollection;
 use Magento\Framework\Api\Search\AggregationInterface;
 use Magento\Framework\Api\Search\SearchResultInterface;
+use Magento\Framework\Search\Response\Aggregation;
 
 class Collection extends AbandonedCartCollection implements SearchResultInterface
 {
     /**
-     * @var AggregationInterface
+     * @var AggregationInterface|null
      */
     protected $aggregations;
 
+    /**
+     * Returns a non-null Aggregation — Magento's DataProvider chains
+     * getAggregations()->getBuckets() and would foreach over null otherwise.
+     * Default = empty buckets, which the framework handles cleanly.
+     */
     public function getAggregations(): AggregationInterface
     {
+        if ($this->aggregations === null) {
+            $this->aggregations = new Aggregation([]);
+        }
         return $this->aggregations;
     }
 
