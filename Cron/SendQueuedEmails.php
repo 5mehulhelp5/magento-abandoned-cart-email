@@ -8,9 +8,10 @@
  * email's TCP round-trip) and isolates retry semantics — a stuck mail
  * server stalls THIS cron's queue, not the discovery cron.
  *
- * Runs every 5 minutes on the offset minute (`2-57/5`) so it doesn't
- * collide with SendReminders' `*/5` tick — when SendReminders is creating
- * fresh QUEUED rows, this cron is processing the previous batch.
+ * Runs every 5 minutes on the offset minute so it doesn't collide with
+ * SendReminders' tick - when SendReminders is creating fresh QUEUED rows,
+ * this cron is processing the previous batch. Exact cron expressions are
+ * in etc/crontab.xml.
  *
  * Performance discipline per §6:
  *   - Profiler span around the loop
