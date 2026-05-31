@@ -50,7 +50,7 @@ class Collection extends AbandonedCartCollection implements SearchResultInterfac
         return null;
     }
 
-    public function setSearchCriteria(\Magento\Framework\Api\SearchCriteriaInterface $searchCriteria = null): self
+    public function setSearchCriteria(?\Magento\Framework\Api\SearchCriteriaInterface $searchCriteria = null): self
     {
         return $this;
     }
@@ -68,7 +68,7 @@ class Collection extends AbandonedCartCollection implements SearchResultInterfac
     /**
      * @param \Magento\Framework\Api\Search\DocumentInterface[] $items
      */
-    public function setItems(array $items = null): self
+    public function setItems(?array $items = null): self
     {
         return $this;
     }

@@ -9,6 +9,7 @@
  *   Etechflow_AbandonedCart::main    — parent menu visibility
  *     ├── ::carts                    — view + manage abandoned-cart grid
  *     ├── ::rules                    — view + manage email rules
+ *     ├── ::popup_rules              — view + manage exit-intent popup rules
  *     └── ::reports                  — view recovery dashboard
  *
  *   Etechflow_AbandonedCart::config  — edit the Stores → Configuration section
@@ -37,6 +38,9 @@
                         <resource id="Etechflow_AbandonedCart::rules"
                                   title="Email Rules"
                                   sortOrder="20"/>
+                        <resource id="Etechflow_AbandonedCart::popup_rules"
+                                  title="Popup Rules"
+                                  sortOrder="25"/>
                         <resource id="Etechflow_AbandonedCart::reports"
                                   title="Reports"
                                   sortOrder="30"/>

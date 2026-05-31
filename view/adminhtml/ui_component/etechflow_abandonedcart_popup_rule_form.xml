@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Popup Rule edit/new form UI Component.
+ *
+ * Five fieldsets:
+ *   1. General Info    — name, description, is_active, priority
+ *   2. Trigger         — trigger_type, trigger_value, page_scope
+ *   3. Popup Content   — headline, body, CTA, image URL
+ *   4. Discount        — linked sales rule
+ *   5. Targeting & Frequency — stores, groups, subtotal range, frequency cap, guests
+ *
+ * Data flow:
+ *   - DataProvider class (Model/PopupRule/DataProvider.php) returns the
+ *     current rule's data keyed by rule_id, with CSV columns split to
+ *     arrays for the multiselects.
+ *   - Save controller (Controller/Adminhtml/PopupRule/Save.php) re-joins
+ *     the multiselect arrays back to CSV before persisting.
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">etechflow_abandonedcart_popup_rule_form.etechflow_abandonedcart_popup_rule_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Popup Rule</item>
+        <item name="config" xsi:type="array">
+            <item name="dataScope" xsi:type="string">data</item>
+            <item name="namespace" xsi:type="string">etechflow_abandonedcart_popup_rule_form</item>
+        </item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
+    </argument>
+
+    <settings>
+        <namespace>etechflow_abandonedcart_popup_rule_form</namespace>
+        <deps>
+            <dep>etechflow_abandonedcart_popup_rule_form.etechflow_abandonedcart_popup_rule_form_data_source</dep>
+        </deps>
+    </settings>
+
+    <dataSource name="etechflow_abandonedcart_popup_rule_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <settings>
+            <submitUrl path="*/*/save"/>
+        </settings>
+        <dataProvider class="Etechflow\AbandonedCart\Model\PopupRule\DataProvider"
+                      name="etechflow_abandonedcart_popup_rule_form_data_source">
+            <settings>
+                <requestFieldName>rule_id</requestFieldName>
+                <primaryFieldName>rule_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <!-- ============================================================ -->
+    <!-- General Info -->
+    <!-- ============================================================ -->
+    <fieldset name="general">
+        <settings>
+            <label translate="true">General Information</label>
+            <collapsible>false</collapsible>
+        </settings>
+
+        <field name="name" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Rule Name</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+
+        <field name="description" formElement="textarea">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Description</label>
+                <notice translate="true">Visible to admins in the Popup Rules grid — describe when this popup shows.</notice>
+            </settings>
+        </field>
+
+        <field name="is_active" formElement="select">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="number">0</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>boolean</dataType>
+                <label translate="true">Active</label>
+                <notice translate="true">When off, this popup never shows regardless of conditions.</notice>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Magento\Config\Model\Config\Source\Yesno"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="priority" formElement="input">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="number">10</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Priority</label>
+                <validation>
+                    <rule name="validate-zero-or-greater" xsi:type="boolean">true</rule>
+                </validation>
+                <notice translate="true">Lower numbers evaluate first when multiple popup rules match the same page.</notice>
+            </settings>
+        </field>
+    </fieldset>
+
+    <!-- ============================================================ -->
+    <!-- Trigger -->
+    <!-- ============================================================ -->
+    <fieldset name="trigger">
+        <settings>
+            <label translate="true">Trigger</label>
+        </settings>
+
+        <field name="trigger_type" formElement="select">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="string">exit_intent</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Trigger Type</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+                <notice translate="true">When the popup is offered: exit-intent (mouse leaves window), time on page, scroll depth, or cart subtotal threshold.</notice>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Etechflow\AbandonedCart\Model\Source\PopupTriggerType"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="trigger_value" formElement="input">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Trigger Value</label>
+                <notice translate="true">For Time on Page: seconds. For Scroll Depth: percent (0-100). For Cart Subtotal: amount. Ignored for Exit Intent.</notice>
+            </settings>
+        </field>
+
+        <field name="page_scope" formElement="select">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="string">all</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Page Scope</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+                <notice translate="true">Which pages this popup can fire on.</notice>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Etechflow\AbandonedCart\Model\Source\PopupPageScope"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+    </fieldset>
+
+    <!-- ============================================================ -->
+    <!-- Popup Content -->
+    <!-- ============================================================ -->
+    <fieldset name="content">
+        <settings>
+            <label translate="true">Popup Content</label>
+        </settings>
+
+        <field name="popup_headline" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Headline</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+                <notice translate="true">Bold attention-grabbing line at the top of the popup.</notice>
+            </settings>
+        </field>
+
+        <field name="popup_body" formElement="textarea">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Body</label>
+                <notice translate="true">Supporting copy below the headline. HTML allowed.</notice>
+            </settings>
+        </field>
+
+        <field name="popup_cta_text" formElement="input">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="string">Get My Discount</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Call-To-Action Button Text</label>
+            </settings>
+        </field>
+
+        <field name="popup_image_url" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Image URL</label>
+                <notice translate="true">Optional banner image shown above the headline. Use an absolute URL.</notice>
+            </settings>
+        </field>
+    </fieldset>
+
+    <!-- ============================================================ -->
+    <!-- Discount -->
+    <!-- ============================================================ -->
+    <fieldset name="discount">
+        <settings>
+            <label translate="true">Discount</label>
+        </settings>
+
+        <field name="sales_rule_id" formElement="input">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Linked Cart Price Rule ID</label>
+                <notice translate="true">When customer clicks the CTA, a coupon code is generated for this Cart Price Rule and applied to their cart. Create the rule under Marketing → Cart Price Rules and paste its ID here. Leave blank for non-discount popups.</notice>
+            </settings>
+        </field>
+    </fieldset>
+
+    <!-- ============================================================ -->
+    <!-- Targeting & Frequency -->
+    <!-- ============================================================ -->
+    <fieldset name="targeting">
+        <settings>
+            <label translate="true">Targeting &amp; Frequency</label>
+        </settings>
+
+        <field name="store_ids" formElement="multiselect">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="string">0</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Stores</label>
+                <notice translate="true">Restrict this popup to specific stores. Select "All Store Views" to show on every store.</notice>
+            </settings>
+            <formElements>
+                <multiselect>
+                    <settings>
+                        <options class="Magento\Store\Model\System\Store"/>
+                    </settings>
+                </multiselect>
+            </formElements>
+        </field>
+
+        <field name="customer_group_ids" formElement="multiselect">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="string">0</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Customer Groups</label>
+                <notice translate="true">Restrict this popup to specific customer groups. Includes "NOT LOGGED IN" for guests.</notice>
+            </settings>
+            <formElements>
+                <multiselect>
+                    <settings>
+                        <options class="Magento\Customer\Model\ResourceModel\Group\Collection"/>
+                    </settings>
+                </multiselect>
+            </formElements>
+        </field>
+
+        <field name="min_cart_subtotal" formElement="input">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Minimum Cart Subtotal</label>
+                <notice translate="true">Only show if the cart's subtotal is at least this amount. Leave blank for no minimum.</notice>
+            </settings>
+        </field>
+
+        <field name="max_cart_subtotal" formElement="input">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Maximum Cart Subtotal</label>
+                <notice translate="true">Only show if the cart's subtotal is at most this amount. Leave blank for no maximum.</notice>
+            </settings>
+        </field>
+
+        <field name="apply_to_guests" formElement="select">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="number">1</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>boolean</dataType>
+                <label translate="true">Apply to Guests</label>
+                <notice translate="true">When off, this popup only shows to logged-in customers.</notice>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Magento\Config\Model\Config\Source\Yesno"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="frequency" formElement="select">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="string">once_per_session</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Frequency</label>
+                <notice translate="true">How often the same visitor can see this popup.</notice>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Etechflow\AbandonedCart\Model\Source\PopupFrequency"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="max_impressions_per_customer" formElement="input">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="number">3</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Max Impressions per Customer</label>
+                <validation>
+                    <rule name="validate-zero-or-greater" xsi:type="boolean">true</rule>
+                </validation>
+                <notice translate="true">Hard cap on lifetime impressions per customer/session, regardless of Frequency setting. 0 = unlimited.</notice>
+            </settings>
+        </field>
+    </fieldset>
+
+</form>

@@ -100,5 +100,66 @@
             "ETECHFLOW_AC_LOG_RULE_ID_AC_RULE_RULE_ID": true,
             "ETECHFLOW_AC_LOG_REC_ORDER_ID_SALES_ORDER_ENTITY_ID": true
         }
+    },
+    "etechflow_popup_rule": {
+        "column": {
+            "rule_id": true,
+            "name": true,
+            "description": true,
+            "is_active": true,
+            "priority": true,
+            "trigger_type": true,
+            "trigger_value": true,
+            "page_scope": true,
+            "min_cart_subtotal": true,
+            "max_cart_subtotal": true,
+            "store_ids": true,
+            "customer_group_ids": true,
+            "popup_headline": true,
+            "popup_body": true,
+            "popup_cta_text": true,
+            "popup_image_url": true,
+            "sales_rule_id": true,
+            "frequency": true,
+            "max_impressions_per_customer": true,
+            "apply_to_guests": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "ETECHFLOW_POPUP_RULE_ACTIVE_PRIORITY": true,
+            "ETECHFLOW_POPUP_RULE_PAGE_SCOPE": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "etechflow_popup_impression": {
+        "column": {
+            "impression_id": true,
+            "popup_rule_id": true,
+            "customer_id": true,
+            "customer_email": true,
+            "quote_id": true,
+            "session_id": true,
+            "store_id": true,
+            "device_type": true,
+            "shown_at": true,
+            "dismissed_at": true,
+            "accepted_at": true,
+            "coupon_code_generated": true,
+            "converted_order_id": true
+        },
+        "index": {
+            "ETECHFLOW_POPUP_IMPRESSION_RULE_SHOWN": true,
+            "ETECHFLOW_POPUP_IMPRESSION_SESSION": true,
+            "ETECHFLOW_POPUP_IMPRESSION_CUSTOMER_EMAIL": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ETECHFLOW_POPUP_IMPRESSION_RULE_ID_FK": true,
+            "ETECHFLOW_POPUP_IMPRESSION_CUSTOMER_ID_FK": true,
+            "ETECHFLOW_POPUP_IMPRESSION_ORDER_ID_FK": true
+        }
     }
 }

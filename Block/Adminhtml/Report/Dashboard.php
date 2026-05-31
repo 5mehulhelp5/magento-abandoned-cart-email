@@ -28,6 +28,13 @@ class Dashboard extends Template
      */
     private ?array $cachedPerRule = null;
 
+    private ?array $cachedPopupSummary = null;
+
+    /**
+     * @var array<int, array>|null
+     */
+    private ?array $cachedPerPopupRule = null;
+
     public function __construct(
         Context $context,
         private readonly Registry $registry,
@@ -59,6 +66,30 @@ class Dashboard extends Template
             $this->cachedPerRule = $this->aggregator->getPerRuleSummary($from, $to);
         }
         return $this->cachedPerRule;
+    }
+
+    /**
+     * @return array<string, int|float>
+     */
+    public function getPopupSummary(): array
+    {
+        if ($this->cachedPopupSummary === null) {
+            [$from, $to] = $this->getDateRange();
+            $this->cachedPopupSummary = $this->aggregator->getPopupSummary($from, $to);
+        }
+        return $this->cachedPopupSummary;
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function getPerPopupRuleSummary(): array
+    {
+        if ($this->cachedPerPopupRule === null) {
+            [$from, $to] = $this->getDateRange();
+            $this->cachedPerPopupRule = $this->aggregator->getPerPopupRuleSummary($from, $to);
+        }
+        return $this->cachedPerPopupRule;
     }
 
     public function getFromDate(): string

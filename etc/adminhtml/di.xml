@@ -25,6 +25,8 @@
                       xsi:type="string">Etechflow\AbandonedCart\Model\ResourceModel\AbandonedCart\Grid\Collection</item>
                 <item name="etechflow_abandonedcart_rule_listing_data_source"
                       xsi:type="string">Etechflow\AbandonedCart\Model\ResourceModel\Rule\Grid\Collection</item>
+                <item name="etechflow_abandonedcart_popup_rule_listing_data_source"
+                      xsi:type="string">Etechflow\AbandonedCart\Model\ResourceModel\PopupRule\Grid\Collection</item>
             </argument>
         </arguments>
     </type>

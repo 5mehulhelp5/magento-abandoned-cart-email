@@ -24,9 +24,11 @@ use Psr\Log\LoggerInterface;
 
 class ReportAggregator
 {
-    private const TABLE_CART = 'etechflow_abandoned_cart';
-    private const TABLE_LOG  = 'etechflow_abandoned_cart_email_log';
-    private const TABLE_RULE = 'etechflow_abandoned_cart_rule';
+    private const TABLE_CART        = 'etechflow_abandoned_cart';
+    private const TABLE_LOG         = 'etechflow_abandoned_cart_email_log';
+    private const TABLE_RULE        = 'etechflow_abandoned_cart_rule';
+    private const TABLE_POPUP_RULE  = 'etechflow_popup_rule';
+    private const TABLE_POPUP_IMPR  = 'etechflow_popup_impression';
 
     public function __construct(
         private readonly ResourceConnection $resource,
@@ -175,6 +177,127 @@ class ReportAggregator
         } catch (\Throwable $e) {
             $this->logger->error(
                 'Etechflow_AbandonedCart: ReportAggregator.getPerRuleSummary failed',
+                ['exception' => $e->getMessage()]
+            );
+            return [];
+        }
+    }
+
+    /**
+     * Popup-feature KPIs for the given window. Returns zeroes (not error)
+     * when the popup tables are empty so the dashboard can render cleanly
+     * before any popup activity.
+     *
+     * @return array<string, int|float>
+     */
+    public function getPopupSummary(string $fromDate, string $toDate, ?int $storeId = null): array
+    {
+        try {
+            $conn        = $this->resource->getConnection();
+            $imprTable   = $this->resource->getTableName(self::TABLE_POPUP_IMPR);
+
+            $select = $conn->select()
+                ->from(
+                    ['i' => $imprTable],
+                    [
+                        'impressions' => 'COUNT(*)',
+                        'accepted'    => 'SUM(CASE WHEN i.accepted_at IS NOT NULL THEN 1 ELSE 0 END)',
+                        'dismissed'   => 'SUM(CASE WHEN i.dismissed_at IS NOT NULL THEN 1 ELSE 0 END)',
+                        'converted'   => 'SUM(CASE WHEN i.converted_order_id IS NOT NULL THEN 1 ELSE 0 END)',
+                    ]
+                )
+                ->where('i.shown_at >= ?', $fromDate)
+                ->where('i.shown_at <= ?', $toDate);
+
+            if ($storeId !== null) {
+                $select->where('i.store_id = ?', $storeId);
+            }
+            $row = $conn->fetchRow($select) ?: [];
+
+            $impressions = (int) ($row['impressions'] ?? 0);
+            $accepted    = (int) ($row['accepted'] ?? 0);
+            $converted   = (int) ($row['converted'] ?? 0);
+
+            return [
+                'impressions'      => $impressions,
+                'accepted'         => $accepted,
+                'dismissed'        => (int) ($row['dismissed'] ?? 0),
+                'converted'        => $converted,
+                'acceptance_rate'  => $this->rate($accepted, $impressions),
+                'conversion_rate'  => $this->rate($converted, $accepted),
+            ];
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'Etechflow_AbandonedCart: ReportAggregator.getPopupSummary failed',
+                ['exception' => $e->getMessage()]
+            );
+            return [
+                'impressions'      => 0,
+                'accepted'         => 0,
+                'dismissed'        => 0,
+                'converted'        => 0,
+                'acceptance_rate'  => 0.0,
+                'conversion_rate'  => 0.0,
+            ];
+        }
+    }
+
+    /**
+     * Per-popup-rule breakdown — which popup wins?
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getPerPopupRuleSummary(string $fromDate, string $toDate, ?int $storeId = null): array
+    {
+        try {
+            $conn       = $this->resource->getConnection();
+            $imprTable  = $this->resource->getTableName(self::TABLE_POPUP_IMPR);
+            $ruleTable  = $this->resource->getTableName(self::TABLE_POPUP_RULE);
+
+            $joinCondParts = [
+                'i.popup_rule_id = r.rule_id',
+                'i.shown_at >= ' . $conn->quote($fromDate),
+                'i.shown_at <= ' . $conn->quote($toDate),
+            ];
+            if ($storeId !== null) {
+                $joinCondParts[] = 'i.store_id = ' . (int) $storeId;
+            }
+
+            $select = $conn->select()
+                ->from(['r' => $ruleTable], [
+                    'rule_id'      => 'r.rule_id',
+                    'rule_name'    => 'r.name',
+                    'is_active'    => 'r.is_active',
+                    'trigger_type' => 'r.trigger_type',
+                    'page_scope'   => 'r.page_scope',
+                ])
+                ->joinLeft(
+                    ['i' => $imprTable],
+                    implode(' AND ', $joinCondParts),
+                    [
+                        'impressions' => 'COUNT(i.impression_id)',
+                        'accepted'    => 'SUM(CASE WHEN i.accepted_at IS NOT NULL THEN 1 ELSE 0 END)',
+                        'converted'   => 'SUM(CASE WHEN i.converted_order_id IS NOT NULL THEN 1 ELSE 0 END)',
+                    ]
+                )
+                ->group(['r.rule_id', 'r.name', 'r.is_active', 'r.trigger_type', 'r.page_scope'])
+                ->order('r.priority ASC');
+
+            $rows = $conn->fetchAll($select) ?: [];
+            foreach ($rows as &$row) {
+                $impressions = (int) ($row['impressions'] ?? 0);
+                $accepted    = (int) ($row['accepted'] ?? 0);
+                $converted   = (int) ($row['converted'] ?? 0);
+                $row['impressions']     = $impressions;
+                $row['accepted']        = $accepted;
+                $row['converted']       = $converted;
+                $row['acceptance_rate'] = $this->rate($accepted, $impressions);
+                $row['conversion_rate'] = $this->rate($converted, $accepted);
+            }
+            return $rows;
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'Etechflow_AbandonedCart: ReportAggregator.getPerPopupRuleSummary failed',
                 ['exception' => $e->getMessage()]
             );
             return [];

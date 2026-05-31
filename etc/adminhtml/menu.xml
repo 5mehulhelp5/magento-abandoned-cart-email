@@ -51,6 +51,14 @@
              action="etechflow_abandonedcart/rule/index"
              resource="Etechflow_AbandonedCart::rules"/>
 
+        <add id="Etechflow_AbandonedCart::popup_rules"
+             title="Popup Rules"
+             module="Etechflow_AbandonedCart"
+             sortOrder="25"
+             parent="Etechflow_AbandonedCart::main"
+             action="etechflow_abandonedcart/popuprule/index"
+             resource="Etechflow_AbandonedCart::popup_rules"/>
+
         <add id="Etechflow_AbandonedCart::reports"
              title="Reports"
              module="Etechflow_AbandonedCart"

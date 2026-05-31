@@ -1,0 +1,150 @@
+/**
+ * Etechflow_AbandonedCart - Popup modal styles.
+ *
+ * Theme-neutral: no Magento/Luma/Hyvä CSS framework dependency. Works
+ * as-is on both Luma and Hyvä. Merchants who want to restyle should
+ * override these classes in their own theme rather than editing here.
+ *
+ * Container hidden by default; `.is-open` reveals it. Body class
+ * `etechflow-popup-open` is added to lock scroll while the popup is up.
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+
+#etechflow-popup-container {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+#etechflow-popup-container.is-open {
+    display: flex;
+}
+
+body.etechflow-popup-open {
+    overflow: hidden;
+}
+
+.etechflow-popup__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    cursor: pointer;
+}
+
+.etechflow-popup__dialog {
+    position: relative;
+    background: #ffffff;
+    color: #1f2937;
+    width: 90%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 32px 28px 28px;
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    animation: etechflowPopupIn 220ms ease-out;
+}
+
+@keyframes etechflowPopupIn {
+    from { transform: scale(0.94); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+.etechflow-popup__close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: transparent;
+    border: 0;
+    font-size: 26px;
+    line-height: 1;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 6px 10px;
+}
+
+.etechflow-popup__close:hover {
+    color: #111827;
+}
+
+.etechflow-popup__image {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto 16px;
+    border-radius: 8px;
+}
+
+.etechflow-popup__headline {
+    margin: 0 0 12px;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #0f172a;
+    text-align: center;
+}
+
+.etechflow-popup__body {
+    margin: 0 0 20px;
+    font-size: 15px;
+    line-height: 1.55;
+    color: #374151;
+    text-align: center;
+}
+
+.etechflow-popup__cta {
+    display: block;
+    width: 100%;
+    margin: 8px 0 0;
+    padding: 14px 22px;
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 120ms ease-in-out;
+}
+
+.etechflow-popup__cta:hover:not(:disabled) {
+    background: #1e293b;
+}
+
+.etechflow-popup__cta:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
+.etechflow-popup__result {
+    margin: 16px 0 0;
+    padding: 12px 16px;
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #10b981;
+    border-radius: 8px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.etechflow-popup__result strong {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+}
+
+@media (max-width: 480px) {
+    .etechflow-popup__dialog {
+        width: 94%;
+        padding: 24px 20px 20px;
+        border-radius: 10px;
+    }
+    .etechflow-popup__headline {
+        font-size: 20px;
+    }
+}

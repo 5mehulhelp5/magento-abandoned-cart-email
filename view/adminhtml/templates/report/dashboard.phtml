@@ -5,10 +5,12 @@
  * @var \Etechflow\AbandonedCart\Block\Adminhtml\Report\Dashboard $block
  */
 
-$summary = $block->getSummary();
-$perRule = $block->getPerRuleSummary();
-$from    = $block->getFromDate();
-$to      = $block->getToDate();
+$summary       = $block->getSummary();
+$perRule       = $block->getPerRuleSummary();
+$popupSummary  = $block->getPopupSummary();
+$perPopupRule  = $block->getPerPopupRuleSummary();
+$from          = $block->getFromDate();
+$to            = $block->getToDate();
 ?>
 <div style="padding:20px;">
 
@@ -84,6 +86,70 @@ $to      = $block->getToDate();
                         <td style="padding:10px; text-align:right; color:#1f8c44; font-weight:bold;"><?= (int) $row['converted'] ?></td>
                         <td style="padding:10px; text-align:right;"><?= $block->escapeHtml($block->formatRate((float) $row['open_rate'])) ?></td>
                         <td style="padding:10px; text-align:right;"><?= $block->escapeHtml($block->formatRate((float) $row['click_rate'])) ?></td>
+                        <td style="padding:10px; text-align:right; color:#1f8c44; font-weight:bold;"><?= $block->escapeHtml($block->formatRate((float) $row['conversion_rate'])) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
+
+    <!-- Popup metrics section (v1.1.0+) -->
+    <h2 style="margin:32px 0 12px; font-size:18px;"><?= $block->escapeHtml(__('Popup Performance')) ?></h2>
+
+    <!-- Popup KPI cards row -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin-bottom:24px;">
+
+        <?php foreach ([
+            ['label' => __('Impressions'),     'value' => (int) $popupSummary['impressions'],   'color' => '#1979c3'],
+            ['label' => __('Accepted (CTA)'),  'value' => (int) $popupSummary['accepted'],      'color' => '#1f8c44'],
+            ['label' => __('Acceptance Rate'), 'value' => $block->formatRate((float) $popupSummary['acceptance_rate']), 'color' => '#1f8c44'],
+            ['label' => __('Dismissed'),       'value' => (int) $popupSummary['dismissed'],     'color' => '#666'],
+            ['label' => __('Converted Orders'),'value' => (int) $popupSummary['converted'],     'color' => '#1f8c44'],
+            ['label' => __('Conversion Rate'), 'value' => $block->formatRate((float) $popupSummary['conversion_rate']), 'color' => '#1f8c44'],
+        ] as $card): ?>
+            <div style="background:#fff; border:1px solid #ddd; border-radius:6px; padding:16px; text-align:center;">
+                <div style="font-size:12px; color:#666; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
+                    <?= $block->escapeHtml($card['label']) ?>
+                </div>
+                <div style="font-size:28px; font-weight:bold; color:<?= $block->escapeHtmlAttr($card['color']) ?>;">
+                    <?= $block->escapeHtml((string) $card['value']) ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
+
+    </div>
+
+    <!-- Per-popup-rule breakdown -->
+    <?php if (empty($perPopupRule)): ?>
+        <p style="padding:16px; background:#f5f5f5; border-radius:6px; color:#666;">
+            <?= $block->escapeHtml(__('No popup rules to report on yet. Create at least one under Popup Rules.')) ?>
+        </p>
+    <?php else: ?>
+        <table class="admin__table-secondary" style="width:100%; border-collapse:collapse; background:#fff; border:1px solid #ddd; border-radius:6px; overflow:hidden;">
+            <thead style="background:#f5f5f5;">
+                <tr>
+                    <th style="padding:10px; text-align:left;"><?= $block->escapeHtml(__('Popup Rule')) ?></th>
+                    <th style="padding:10px; text-align:center;"><?= $block->escapeHtml(__('Active')) ?></th>
+                    <th style="padding:10px; text-align:center;"><?= $block->escapeHtml(__('Trigger')) ?></th>
+                    <th style="padding:10px; text-align:center;"><?= $block->escapeHtml(__('Page Scope')) ?></th>
+                    <th style="padding:10px; text-align:right;"><?= $block->escapeHtml(__('Impressions')) ?></th>
+                    <th style="padding:10px; text-align:right;"><?= $block->escapeHtml(__('Accepted')) ?></th>
+                    <th style="padding:10px; text-align:right;"><?= $block->escapeHtml(__('Converted')) ?></th>
+                    <th style="padding:10px; text-align:right;"><?= $block->escapeHtml(__('Acceptance Rate')) ?></th>
+                    <th style="padding:10px; text-align:right;"><?= $block->escapeHtml(__('Conversion Rate')) ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($perPopupRule as $row): ?>
+                    <tr style="border-top:1px solid #eee;">
+                        <td style="padding:10px;"><?= $block->escapeHtml($row['rule_name']) ?></td>
+                        <td style="padding:10px; text-align:center;"><?= ((int) $row['is_active'] === 1) ? '✓' : '—' ?></td>
+                        <td style="padding:10px; text-align:center;"><?= $block->escapeHtml((string) $row['trigger_type']) ?></td>
+                        <td style="padding:10px; text-align:center;"><?= $block->escapeHtml((string) $row['page_scope']) ?></td>
+                        <td style="padding:10px; text-align:right;"><?= (int) $row['impressions'] ?></td>
+                        <td style="padding:10px; text-align:right;"><?= (int) $row['accepted'] ?></td>
+                        <td style="padding:10px; text-align:right; color:#1f8c44; font-weight:bold;"><?= (int) $row['converted'] ?></td>
+                        <td style="padding:10px; text-align:right;"><?= $block->escapeHtml($block->formatRate((float) $row['acceptance_rate'])) ?></td>
                         <td style="padding:10px; text-align:right; color:#1f8c44; font-weight:bold;"><?= $block->escapeHtml($block->formatRate((float) $row['conversion_rate'])) ?></td>
                     </tr>
                 <?php endforeach; ?>

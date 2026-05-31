@@ -30,15 +30,25 @@ namespace Etechflow\AbandonedCart\Console\Command;
 use Etechflow\AbandonedCart\Api\AbandonedCartRepositoryInterface;
 use Etechflow\AbandonedCart\Api\Data\AbandonedCartInterface;
 use Etechflow\AbandonedCart\Api\Data\EmailLogInterface;
+use Etechflow\AbandonedCart\Api\Data\PopupImpressionInterface;
+use Etechflow\AbandonedCart\Api\Data\PopupRuleInterface;
 use Etechflow\AbandonedCart\Api\EmailLogRepositoryInterface;
+use Etechflow\AbandonedCart\Api\PopupImpressionRepositoryInterface;
+use Etechflow\AbandonedCart\Api\PopupRuleRepositoryInterface;
 use Etechflow\AbandonedCart\Api\RuleRepositoryInterface;
 use Etechflow\AbandonedCart\Model\AbandonedCartFactory;
 use Etechflow\AbandonedCart\Model\Config;
 use Etechflow\AbandonedCart\Model\EmailLogFactory;
 use Etechflow\AbandonedCart\Model\LicenseValidator;
 use Etechflow\AbandonedCart\Model\Performance\Profiler;
+use Etechflow\AbandonedCart\Model\PopupImpressionFactory;
+use Etechflow\AbandonedCart\Model\PopupRuleFactory;
 use Etechflow\AbandonedCart\Model\Source\CartStatus;
 use Etechflow\AbandonedCart\Model\Source\EmailLogStatus;
+use Etechflow\AbandonedCart\Model\Source\PopupDeviceType;
+use Etechflow\AbandonedCart\Model\Source\PopupFrequency;
+use Etechflow\AbandonedCart\Model\Source\PopupPageScope;
+use Etechflow\AbandonedCart\Model\Source\PopupTriggerType;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Module\Manager as ModuleManager;
 use Symfony\Component\Console\Command\Command;
@@ -61,6 +71,14 @@ class VerifyCommand extends Command
         private readonly EmailLogFactory $emailLogFactory,
         private readonly CartStatus $cartStatusSource,
         private readonly EmailLogStatus $emailLogStatusSource,
+        private readonly PopupRuleRepositoryInterface $popupRuleRepo,
+        private readonly PopupImpressionRepositoryInterface $popupImpressionRepo,
+        private readonly PopupRuleFactory $popupRuleFactory,
+        private readonly PopupImpressionFactory $popupImpressionFactory,
+        private readonly PopupTriggerType $popupTriggerSource,
+        private readonly PopupPageScope $popupPageScopeSource,
+        private readonly PopupFrequency $popupFrequencySource,
+        private readonly PopupDeviceType $popupDeviceSource,
     ) {
         parent::__construct();
     }
@@ -78,8 +96,10 @@ class VerifyCommand extends Command
 
         $passed = 0;
         $failed = 0;
-        $cleanupCartId = null;
-        $cleanupLogId  = null;
+        $cleanupCartId       = null;
+        $cleanupLogId        = null;
+        $cleanupPopupRuleId  = null;
+        $cleanupImpressionId = null;
 
         try {
             $this->runStep($output, 1, 'Module enabled', function (): void {
@@ -88,9 +108,15 @@ class VerifyCommand extends Command
                 }
             }, $passed, $failed);
 
-            $this->runStep($output, 2, 'DB tables present (3)', function (): void {
+            $this->runStep($output, 2, 'DB tables present (5)', function (): void {
                 $conn = $this->resource->getConnection();
-                foreach (['etechflow_abandoned_cart', 'etechflow_abandoned_cart_rule', 'etechflow_abandoned_cart_email_log'] as $t) {
+                foreach ([
+                    'etechflow_abandoned_cart',
+                    'etechflow_abandoned_cart_rule',
+                    'etechflow_abandoned_cart_email_log',
+                    'etechflow_popup_rule',
+                    'etechflow_popup_impression',
+                ] as $t) {
                     if (!$conn->isTableExists($this->resource->getTableName($t))) {
                         throw new \RuntimeException(sprintf('Table %s missing.', $t));
                     }
@@ -177,8 +203,80 @@ class VerifyCommand extends Command
                 $span = Profiler::start('Etechflow_ABC_VerifySmokeTest');
                 Profiler::stop($span);
             }, $passed, $failed);
+
+            $this->runStep($output, 10, 'PopupRuleRepository lists rules', function (): void {
+                $rules = $this->popupRuleRepo->getAll();
+                if (!is_array($rules)) {
+                    throw new \RuntimeException('PopupRule getAll() did not return array.');
+                }
+            }, $passed, $failed);
+
+            $this->runStep($output, 11, 'PopupImpressionRepository lists impressions', function (): void {
+                $imprs = $this->popupImpressionRepo->getAll();
+                if (!is_array($imprs)) {
+                    throw new \RuntimeException('PopupImpression getAll() did not return array.');
+                }
+            }, $passed, $failed);
+
+            $this->runStep($output, 12, 'Popup source models return options', function (): void {
+                if (count($this->popupTriggerSource->toOptionArray()) !== 4) {
+                    throw new \RuntimeException('PopupTriggerType expected 4 options.');
+                }
+                if (count($this->popupPageScopeSource->toOptionArray()) !== 5) {
+                    throw new \RuntimeException('PopupPageScope expected 5 options.');
+                }
+                if (count($this->popupFrequencySource->toOptionArray()) !== 3) {
+                    throw new \RuntimeException('PopupFrequency expected 3 options.');
+                }
+                if (count($this->popupDeviceSource->toOptionArray()) !== 3) {
+                    throw new \RuntimeException('PopupDeviceType expected 3 options.');
+                }
+            }, $passed, $failed);
+
+            $this->runStep($output, 13, 'PopupRule repo round-trip', function () use (&$cleanupPopupRuleId): void {
+                $rule = $this->popupRuleFactory->create();
+                $rule->setName('verifier-popup');
+                $rule->setIsActive(false);
+                $rule->setPriority(99);
+                $rule->setTriggerType(PopupRuleInterface::TRIGGER_EXIT_INTENT);
+                $rule->setTriggerValue(0);
+                $rule->setPageScope(PopupRuleInterface::SCOPE_ALL);
+                $rule->setStoreIds('0');
+                $rule->setCustomerGroupIds('0');
+                $rule->setPopupHeadline('verifier headline');
+                $rule->setPopupCtaText('OK');
+                $rule->setApplyToGuests(true);
+                $rule->setFrequency(PopupRuleInterface::FREQUENCY_ONCE_PER_SESSION);
+                $rule->setMaxImpressionsPerCustomer(1);
+                $this->popupRuleRepo->save($rule);
+                $cleanupPopupRuleId = (int) $rule->getRuleId();
+
+                $loaded = $this->popupRuleRepo->getById($cleanupPopupRuleId);
+                if ($loaded->getName() !== 'verifier-popup') {
+                    throw new \RuntimeException('PopupRule round-trip data mismatch.');
+                }
+            }, $passed, $failed);
+
+            $this->runStep($output, 14, 'PopupImpression repo round-trip', function () use ($cleanupPopupRuleId, &$cleanupImpressionId): void {
+                if ($cleanupPopupRuleId === null) {
+                    throw new \RuntimeException('Step 13 prerequisite missing.');
+                }
+                $impr = $this->popupImpressionFactory->create();
+                $impr->setPopupRuleId($cleanupPopupRuleId);
+                $impr->setSessionId('verifier-session-' . bin2hex(random_bytes(8)));
+                $impr->setStoreId(1);
+                $impr->setDeviceType(PopupImpressionInterface::DEVICE_DESKTOP);
+                $impr->setShownAt(date('Y-m-d H:i:s'));
+                $this->popupImpressionRepo->save($impr);
+                $cleanupImpressionId = (int) $impr->getImpressionId();
+
+                $loaded = $this->popupImpressionRepo->getById($cleanupImpressionId);
+                if ($loaded->getPopupRuleId() !== $cleanupPopupRuleId) {
+                    throw new \RuntimeException('PopupImpression round-trip mismatch.');
+                }
+            }, $passed, $failed);
         } finally {
-            $this->cleanup($cleanupLogId, $cleanupCartId, $output);
+            $this->cleanup($cleanupLogId, $cleanupCartId, $cleanupImpressionId, $cleanupPopupRuleId, $output);
         }
 
         $output->writeln('');
@@ -204,14 +302,25 @@ class VerifyCommand extends Command
         }
     }
 
-    private function cleanup(?int $logId, ?int $cartId, OutputInterface $output): void
-    {
+    private function cleanup(
+        ?int $logId,
+        ?int $cartId,
+        ?int $impressionId,
+        ?int $popupRuleId,
+        OutputInterface $output
+    ): void {
         try {
             if ($logId !== null) {
                 $this->emailLogRepo->deleteById($logId);
             }
             if ($cartId !== null) {
                 $this->cartRepo->deleteById($cartId);
+            }
+            if ($impressionId !== null) {
+                $this->popupImpressionRepo->deleteById($impressionId);
+            }
+            if ($popupRuleId !== null) {
+                $this->popupRuleRepo->deleteById($popupRuleId);
             }
         } catch (\Throwable $e) {
             $output->writeln(sprintf('<comment>Cleanup warning: %s</comment>', $e->getMessage()));

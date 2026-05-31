@@ -1,0 +1,18 @@
+<?php
+/**
+ * Etechflow_AbandonedCart - Hyvä popup container.
+ *
+ * Hyvä has no RequireJS pipeline — we load the same shared
+ * popup-handler.js via a plain <script src> tag pointing to the
+ * view-static URL of the file.
+ *
+ * The handler module is an IIFE that self-bootstraps on
+ * DOMContentLoaded, so no Alpine binding is required to "start" it.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+$handlerUrl = $block->getViewFileUrl('Etechflow_AbandonedCart::js/popup-handler.js');
+?>
+<div id="etechflow-popup-container" aria-hidden="true"></div>
+
+<script src="<?= $block->escapeUrl($handlerUrl) ?>" defer></script>

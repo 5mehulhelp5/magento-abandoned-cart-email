@@ -1,0 +1,14 @@
+<?php
+/**
+ * Etechflow_AbandonedCart - Popup config JSON output.
+ *
+ * Emits a sentinel <script type="application/json"> tag the popup JS
+ * reads on init. Compatible with both Luma (Knockout component) and
+ * Hyvä (Alpine component).
+ *
+ * @var \Etechflow\AbandonedCart\Block\Frontend\PopupConfig $block
+ */
+?>
+<script type="application/json" id="etechflow-popup-config">
+<?= /* @noEscape */ $block->getConfigJson() ?>
+</script>

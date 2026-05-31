@@ -324,4 +324,133 @@
 
     </table>
 
+    <!-- ===================================================================
+         ETechFlow Popup Rules — v1.1.0 (Exit-Intent / On-Page Discount Popups)
+         Each row is an admin-managed rule that fires a popup at a specific
+         trigger (exit intent / time on page / scroll depth / cart subtotal)
+         on a specific page scope (cart / checkout / all), with a linked
+         Magento sales rule for the discount coupon.
+         =================================================================== -->
+    <table name="etechflow_popup_rule" resource="default" engine="innodb"
+           comment="ETechFlow Popup Rules — admin-managed exit-intent / on-page popups">
+
+        <column xsi:type="int" name="rule_id" unsigned="true" nullable="false" identity="true" comment="Rule ID"/>
+
+        <column xsi:type="varchar" name="name" nullable="false" length="255" comment="Rule Name"/>
+        <column xsi:type="text" name="description" nullable="true" comment="Admin Description"/>
+        <column xsi:type="smallint" name="is_active" unsigned="true" nullable="false" default="0" comment="Active (0/1)"/>
+        <column xsi:type="int" name="priority" unsigned="true" nullable="false" default="10" comment="Priority (lower fires first)"/>
+
+        <column xsi:type="varchar" name="trigger_type" nullable="false" length="50" default="exit_intent"
+                comment="exit_intent / time_on_page / scroll_depth / cart_subtotal_threshold"/>
+        <column xsi:type="int" name="trigger_value" unsigned="true" nullable="false" default="0"
+                comment="Seconds for time_on_page, percent (0-100) for scroll_depth, ignored for exit_intent"/>
+
+        <column xsi:type="varchar" name="page_scope" nullable="false" length="50" default="all"
+                comment="all / cart / checkout / category / product"/>
+
+        <column xsi:type="decimal" name="min_cart_subtotal" scale="4" precision="20" nullable="true" comment="Minimum cart subtotal for rule"/>
+        <column xsi:type="decimal" name="max_cart_subtotal" scale="4" precision="20" nullable="true" comment="Maximum cart subtotal for rule"/>
+
+        <column xsi:type="varchar" name="store_ids" nullable="false" length="255" default="0" comment="CSV store IDs (0=All)"/>
+        <column xsi:type="varchar" name="customer_group_ids" nullable="false" length="255" default="0" comment="CSV customer group IDs (0=All)"/>
+
+        <column xsi:type="varchar" name="popup_headline" nullable="false" length="255" default="Wait! Don't leave your cart behind." comment="Popup Headline"/>
+        <column xsi:type="text" name="popup_body" nullable="true" comment="Popup Body Text"/>
+        <column xsi:type="varchar" name="popup_cta_text" nullable="false" length="100" default="Get My Discount" comment="CTA Button Text"/>
+        <column xsi:type="varchar" name="popup_image_url" nullable="true" length="500" comment="Optional Image URL"/>
+
+        <column xsi:type="int" name="sales_rule_id" unsigned="true" nullable="true"
+                comment="Linked Magento sales rule (for coupon generation)"/>
+
+        <column xsi:type="varchar" name="frequency" nullable="false" length="50" default="once_per_session"
+                comment="once_per_session / once_per_day / once_per_lifetime"/>
+        <column xsi:type="int" name="max_impressions_per_customer" unsigned="true" nullable="false" default="1"
+                comment="Max times to show to same customer"/>
+
+        <column xsi:type="smallint" name="apply_to_guests" unsigned="true" nullable="false" default="1"
+                comment="Show to guest visitors (0/1)"/>
+
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="rule_id"/>
+        </constraint>
+
+        <index referenceId="ETECHFLOW_POPUP_RULE_ACTIVE_PRIORITY" indexType="btree">
+            <column name="is_active"/>
+            <column name="priority"/>
+        </index>
+
+        <index referenceId="ETECHFLOW_POPUP_RULE_PAGE_SCOPE" indexType="btree">
+            <column name="page_scope"/>
+        </index>
+
+    </table>
+
+    <!-- ===================================================================
+         ETechFlow Popup Impression Log — analytics + frequency capping.
+         One row per popup display (shown_at), updated when customer
+         dismisses (dismissed_at) or accepts the offer (accepted_at).
+         Linked back to order on conversion (converted_order_id).
+         =================================================================== -->
+    <table name="etechflow_popup_impression" resource="default" engine="innodb"
+           comment="ETechFlow Popup Impression Log — per-show event records for analytics + frequency cap">
+
+        <column xsi:type="int" name="impression_id" unsigned="true" nullable="false" identity="true" comment="Impression ID"/>
+
+        <column xsi:type="int" name="popup_rule_id" unsigned="true" nullable="false" comment="Source rule"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="true" comment="Customer ID (NULL for guests)"/>
+        <column xsi:type="varchar" name="customer_email" nullable="true" length="255" comment="Customer email if known"/>
+        <column xsi:type="int" name="quote_id" unsigned="true" nullable="true" comment="Cart at time of impression"/>
+        <column xsi:type="varchar" name="session_id" nullable="false" length="64" comment="Magento session ID (for guest tracking)"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" default="0" comment="Store ID"/>
+        <column xsi:type="varchar" name="device_type" nullable="false" length="20" default="desktop"
+                comment="desktop / mobile / tablet"/>
+
+        <column xsi:type="timestamp" name="shown_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="When popup was shown"/>
+        <column xsi:type="timestamp" name="dismissed_at" on_update="false" nullable="true" comment="When customer closed it"/>
+        <column xsi:type="timestamp" name="accepted_at" on_update="false" nullable="true" comment="When customer clicked CTA"/>
+
+        <column xsi:type="varchar" name="coupon_code_generated" nullable="true" length="100" comment="Single-use coupon issued"/>
+        <column xsi:type="int" name="converted_order_id" unsigned="true" nullable="true" comment="Order placed using this popup's coupon"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="impression_id"/>
+        </constraint>
+
+        <constraint xsi:type="foreign"
+                    referenceId="ETECHFLOW_POPUP_IMPRESSION_RULE_ID_FK"
+                    table="etechflow_popup_impression" column="popup_rule_id"
+                    referenceTable="etechflow_popup_rule" referenceColumn="rule_id"
+                    onDelete="CASCADE"/>
+
+        <constraint xsi:type="foreign"
+                    referenceId="ETECHFLOW_POPUP_IMPRESSION_CUSTOMER_ID_FK"
+                    table="etechflow_popup_impression" column="customer_id"
+                    referenceTable="customer_entity" referenceColumn="entity_id"
+                    onDelete="SET NULL"/>
+
+        <constraint xsi:type="foreign"
+                    referenceId="ETECHFLOW_POPUP_IMPRESSION_ORDER_ID_FK"
+                    table="etechflow_popup_impression" column="converted_order_id"
+                    referenceTable="sales_order" referenceColumn="entity_id"
+                    onDelete="SET NULL"/>
+
+        <index referenceId="ETECHFLOW_POPUP_IMPRESSION_RULE_SHOWN" indexType="btree">
+            <column name="popup_rule_id"/>
+            <column name="shown_at"/>
+        </index>
+
+        <index referenceId="ETECHFLOW_POPUP_IMPRESSION_SESSION" indexType="btree">
+            <column name="session_id"/>
+        </index>
+
+        <index referenceId="ETECHFLOW_POPUP_IMPRESSION_CUSTOMER_EMAIL" indexType="btree">
+            <column name="customer_email"/>
+        </index>
+
+    </table>
+
 </schema>

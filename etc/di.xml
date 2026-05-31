@@ -29,6 +29,10 @@
                 type="Etechflow\AbandonedCart\Model\Rule"/>
     <preference for="Etechflow\AbandonedCart\Api\Data\EmailLogInterface"
                 type="Etechflow\AbandonedCart\Model\EmailLog"/>
+    <preference for="Etechflow\AbandonedCart\Api\Data\PopupRuleInterface"
+                type="Etechflow\AbandonedCart\Model\PopupRule"/>
+    <preference for="Etechflow\AbandonedCart\Api\Data\PopupImpressionInterface"
+                type="Etechflow\AbandonedCart\Model\PopupImpression"/>
 
     <!-- Repository interfaces → concrete Repository classes -->
     <preference for="Etechflow\AbandonedCart\Api\AbandonedCartRepositoryInterface"
@@ -37,6 +41,10 @@
                 type="Etechflow\AbandonedCart\Model\RuleRepository"/>
     <preference for="Etechflow\AbandonedCart\Api\EmailLogRepositoryInterface"
                 type="Etechflow\AbandonedCart\Model\EmailLogRepository"/>
+    <preference for="Etechflow\AbandonedCart\Api\PopupRuleRepositoryInterface"
+                type="Etechflow\AbandonedCart\Model\PopupRuleRepository"/>
+    <preference for="Etechflow\AbandonedCart\Api\PopupImpressionRepositoryInterface"
+                type="Etechflow\AbandonedCart\Model\PopupImpressionRepository"/>
 
     <!--
        Plugin: catch order placement at the deepest level (QuoteManagement::submit)

@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Hyvä variant of the popup wiring.
+ *
+ * Same three pieces as Luma (config JSON + container + CSS) but Hyvä
+ * doesn't use RequireJS, so the container template loads the JS file
+ * directly via <script src>.
+ *
+ * The CSS file is theme-neutral — no Luma/Hyvä-framework dependency.
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Etechflow_AbandonedCart::css/popup.css"/>
+    </head>
+    <body>
+        <referenceContainer name="before.body.end">
+            <block class="Etechflow\AbandonedCart\Block\Frontend\PopupConfig"
+                   name="etechflow.abandonedcart.popup.config.hyva"
+                   template="Etechflow_AbandonedCart::popup/config.phtml"
+                   cacheable="false"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="etechflow.abandonedcart.popup.container.hyva"
+                   template="Etechflow_AbandonedCart::hyva/popup/container.phtml"
+                   cacheable="false"/>
+        </referenceContainer>
+    </body>
+</page>

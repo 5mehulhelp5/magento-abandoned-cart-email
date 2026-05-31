@@ -1,0 +1,20 @@
+<?php
+/**
+ * Etechflow_AbandonedCart - Luma popup container.
+ *
+ * Empty root div the JS handler fills on trigger fire. Loads the shared
+ * popup-handler module via Magento's RequireJS pipeline — the module
+ * name resolves to view/frontend/web/js/popup-handler.js automatically.
+ *
+ * The module is an IIFE that self-bootstraps on DOMContentLoaded; we
+ * use `require()` only to plug it into the RequireJS load order, no
+ * Knockout binding needed.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ */
+?>
+<div id="etechflow-popup-container" aria-hidden="true"></div>
+
+<script>
+    require(['Etechflow_AbandonedCart/js/popup-handler']);
+</script>

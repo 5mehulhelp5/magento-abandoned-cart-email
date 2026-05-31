@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Wires the popup config + container + CSS into
+ * every Luma frontend page.
+ *
+ * Three pieces:
+ *   1. popup/config.phtml emits the JSON sentinel the JS reads on init.
+ *   2. popup/container.phtml supplies the empty root div + require() call.
+ *   3. <head> registers the CSS asset.
+ *
+ * Both blocks land in `before.body.end` so the JS can read its config
+ * synchronously on DOMContentLoaded. Hyvä uses hyva_default.xml.
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Etechflow_AbandonedCart::css/popup.css"/>
+    </head>
+    <body>
+        <referenceContainer name="before.body.end">
+            <block class="Etechflow\AbandonedCart\Block\Frontend\PopupConfig"
+                   name="etechflow.abandonedcart.popup.config"
+                   template="Etechflow_AbandonedCart::popup/config.phtml"
+                   cacheable="false"/>
+            <block class="Magento\Framework\View\Element\Template"
+                   name="etechflow.abandonedcart.popup.container"
+                   template="Etechflow_AbandonedCart::popup/container.phtml"
+                   cacheable="false"/>
+        </referenceContainer>
+    </body>
+</page>

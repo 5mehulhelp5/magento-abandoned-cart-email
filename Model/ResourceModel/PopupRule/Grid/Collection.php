@@ -1,32 +1,29 @@
 <?php
 /**
- * Etechflow_AbandonedCart - Rule grid collection.
+ * Etechflow_AbandonedCart - PopupRule grid collection.
  *
- * Mirror of [[Etechflow\AbandonedCart\Model\ResourceModel\AbandonedCart\Grid\Collection]]
- * for the rule entity. UI Component data provider needs SearchResultInterface.
+ * Mirror of [[Etechflow\AbandonedCart\Model\ResourceModel\Rule\Grid\Collection]]
+ * for the popup-rule entity. UI Component data provider needs SearchResultInterface.
  *
  * @category   ETechFlow
  * @package    Etechflow_AbandonedCart
  */
 declare(strict_types=1);
 
-namespace Etechflow\AbandonedCart\Model\ResourceModel\Rule\Grid;
+namespace Etechflow\AbandonedCart\Model\ResourceModel\PopupRule\Grid;
 
-use Etechflow\AbandonedCart\Model\ResourceModel\Rule\Collection as RuleCollection;
+use Etechflow\AbandonedCart\Model\ResourceModel\PopupRule\Collection as PopupRuleCollection;
 use Magento\Framework\Api\Search\AggregationInterface;
 use Magento\Framework\Api\Search\SearchResultInterface;
 use Magento\Framework\Search\Response\Aggregation;
 
-class Collection extends RuleCollection implements SearchResultInterface
+class Collection extends PopupRuleCollection implements SearchResultInterface
 {
     /**
      * @var AggregationInterface|null
      */
     protected $aggregations;
 
-    /**
-     * See AbandonedCart\Grid\Collection — same fix.
-     */
     public function getAggregations(): AggregationInterface
     {
         if ($this->aggregations === null) {
