@@ -36,6 +36,12 @@
     </argument>
 
     <settings>
+        <buttons>
+            <button name="back" class="Etechflow\AbandonedCart\Block\Adminhtml\Rule\Edit\BackButton"/>
+            <button name="delete" class="Etechflow\AbandonedCart\Block\Adminhtml\Rule\Edit\DeleteButton"/>
+            <button name="save_and_continue" class="Etechflow\AbandonedCart\Block\Adminhtml\Rule\Edit\SaveAndContinueButton"/>
+            <button name="save" class="Etechflow\AbandonedCart\Block\Adminhtml\Rule\Edit\SaveButton"/>
+        </buttons>
         <namespace>etechflow_abandonedcart_rule_form</namespace>
         <deps>
             <dep>etechflow_abandonedcart_rule_form.etechflow_abandonedcart_rule_form_data_source</dep>
