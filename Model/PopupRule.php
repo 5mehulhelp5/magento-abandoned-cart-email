@@ -108,12 +108,13 @@ class PopupRule extends AbstractModel implements PopupRuleInterface
         return $this->setData(self::TRIGGER_TYPE, $triggerType);
     }
 
-    public function getTriggerValue(): int
+    public function getTriggerValue(): ?int
     {
-        return (int) $this->getData(self::TRIGGER_VALUE);
+        $value = $this->getData(self::TRIGGER_VALUE);
+        return $value === null ? null : (int) $value;
     }
 
-    public function setTriggerValue(int $value): self
+    public function setTriggerValue(?int $value): self
     {
         return $this->setData(self::TRIGGER_VALUE, $value);
     }

@@ -97,11 +97,11 @@ interface PopupRuleInterface
     /** @return self */
     public function setTriggerType(string $triggerType): self;
 
-    /** @return int */
-    public function getTriggerValue(): int;
+    /** @return int|null */
+    public function getTriggerValue(): ?int;
 
     /** @return self */
-    public function setTriggerValue(int $value): self;
+    public function setTriggerValue(?int $value): self;
 
     /** @return string */
     public function getPageScope(): string;
