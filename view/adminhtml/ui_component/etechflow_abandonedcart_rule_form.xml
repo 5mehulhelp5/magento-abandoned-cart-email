@@ -244,7 +244,7 @@
             <label translate="true">Targeting</label>
         </settings>
 
-        <field name="store_ids" formElement="multiselect">
+        <field name="store_ids" formElement="checkboxset">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="default" xsi:type="string">0</item>
@@ -253,18 +253,18 @@
             <settings>
                 <dataType>text</dataType>
                 <label translate="true">Stores</label>
-                <notice translate="true">Restrict this rule to specific stores. Select "All Store Views" to fire on every store.</notice>
+                <notice translate="true">Restrict this rule to specific stores. Leave all unchecked to fire on every store.</notice>
             </settings>
             <formElements>
-                <multiselect>
+                <checkboxset>
                     <settings>
                         <options class="Magento\Store\Model\System\Store"/>
                     </settings>
-                </multiselect>
+                </checkboxset>
             </formElements>
         </field>
 
-        <field name="customer_group_ids" formElement="multiselect">
+        <field name="customer_group_ids" formElement="checkboxset">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="default" xsi:type="string">0</item>
@@ -273,14 +273,14 @@
             <settings>
                 <dataType>text</dataType>
                 <label translate="true">Customer Groups</label>
-                <notice translate="true">Restrict this rule to specific customer groups. Includes "NOT LOGGED IN" for guests.</notice>
+                <notice translate="true">Restrict this rule to specific customer groups. Includes "NOT LOGGED IN" for guests. Leave all unchecked to fire for every group.</notice>
             </settings>
             <formElements>
-                <multiselect>
+                <checkboxset>
                     <settings>
                         <options class="Magento\Customer\Model\ResourceModel\Group\Collection"/>
                     </settings>
-                </multiselect>
+                </checkboxset>
             </formElements>
         </field>
 
