@@ -429,43 +429,45 @@
             <label translate="true">Targeting &amp; Frequency</label>
         </settings>
 
-        <field name="store_ids" formElement="checkboxset">
+        <field name="store_ids" formElement="multiselect">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="default" xsi:type="string">0</item>
+                    <item name="size" xsi:type="number">6</item>
                 </item>
             </argument>
             <settings>
                 <dataType>text</dataType>
                 <label translate="true">Stores</label>
-                <notice translate="true">Restrict this popup to specific stores. Leave all unchecked to show on every store.</notice>
+                <notice translate="true">Hold Ctrl (Windows/Linux) or Cmd (Mac) and click to select multiple. Leave nothing selected to show on every store.</notice>
             </settings>
             <formElements>
-                <checkboxset>
+                <multiselect>
                     <settings>
                         <options class="Magento\Store\Model\System\Store"/>
                     </settings>
-                </checkboxset>
+                </multiselect>
             </formElements>
         </field>
 
-        <field name="customer_group_ids" formElement="checkboxset">
+        <field name="customer_group_ids" formElement="multiselect">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="default" xsi:type="string">0</item>
+                    <item name="size" xsi:type="number">6</item>
                 </item>
             </argument>
             <settings>
                 <dataType>text</dataType>
                 <label translate="true">Customer Groups</label>
-                <notice translate="true">Restrict this popup to specific customer groups. Includes "NOT LOGGED IN" for guests. Leave all unchecked to show to every group.</notice>
+                <notice translate="true">Hold Ctrl (Windows/Linux) or Cmd (Mac) and click to select multiple groups. Includes "NOT LOGGED IN" for guests. Leave nothing selected to show to every group.</notice>
             </settings>
             <formElements>
-                <checkboxset>
+                <multiselect>
                     <settings>
                         <options class="Magento\Customer\Model\ResourceModel\Group\Collection"/>
                     </settings>
-                </checkboxset>
+                </multiselect>
             </formElements>
         </field>
 
