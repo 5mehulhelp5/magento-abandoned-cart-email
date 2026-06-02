@@ -254,6 +254,120 @@ class PopupRule extends AbstractModel implements PopupRuleInterface
         return $this->setData(self::APPLY_TO_GUESTS, $applyToGuests ? 1 : 0);
     }
 
+    /* ===== Visual design (v1.2.0) ===== */
+
+    public function getTemplateLayout(): string
+    {
+        $value = $this->getData(self::TEMPLATE_LAYOUT);
+        return $value !== null && $value !== '' ? (string) $value : self::LAYOUT_MODAL;
+    }
+
+    public function setTemplateLayout(string $layout): self
+    {
+        return $this->setData(self::TEMPLATE_LAYOUT, $layout);
+    }
+
+    public function getBgColor(): string
+    {
+        $value = $this->getData(self::BG_COLOR);
+        return $value !== null && $value !== '' ? (string) $value : '#ffffff';
+    }
+
+    public function setBgColor(string $hex): self
+    {
+        return $this->setData(self::BG_COLOR, $hex);
+    }
+
+    public function getHeadlineColor(): string
+    {
+        $value = $this->getData(self::HEADLINE_COLOR);
+        return $value !== null && $value !== '' ? (string) $value : '#0f172a';
+    }
+
+    public function setHeadlineColor(string $hex): self
+    {
+        return $this->setData(self::HEADLINE_COLOR, $hex);
+    }
+
+    public function getBodyColor(): string
+    {
+        $value = $this->getData(self::BODY_COLOR);
+        return $value !== null && $value !== '' ? (string) $value : '#374151';
+    }
+
+    public function setBodyColor(string $hex): self
+    {
+        return $this->setData(self::BODY_COLOR, $hex);
+    }
+
+    public function getCtaBgColor(): string
+    {
+        $value = $this->getData(self::CTA_BG_COLOR);
+        return $value !== null && $value !== '' ? (string) $value : '#0f172a';
+    }
+
+    public function setCtaBgColor(string $hex): self
+    {
+        return $this->setData(self::CTA_BG_COLOR, $hex);
+    }
+
+    public function getCtaTextColor(): string
+    {
+        $value = $this->getData(self::CTA_TEXT_COLOR);
+        return $value !== null && $value !== '' ? (string) $value : '#ffffff';
+    }
+
+    public function setCtaTextColor(string $hex): self
+    {
+        return $this->setData(self::CTA_TEXT_COLOR, $hex);
+    }
+
+    public function getBorderRadius(): int
+    {
+        $value = $this->getData(self::BORDER_RADIUS);
+        return $value !== null ? (int) $value : 12;
+    }
+
+    public function setBorderRadius(int $px): self
+    {
+        return $this->setData(self::BORDER_RADIUS, $px);
+    }
+
+    public function getDialogWidth(): int
+    {
+        $value = $this->getData(self::DIALOG_WIDTH);
+        return $value !== null ? (int) $value : 480;
+    }
+
+    public function setDialogWidth(int $px): self
+    {
+        return $this->setData(self::DIALOG_WIDTH, $px);
+    }
+
+    public function getAnimationType(): string
+    {
+        $value = $this->getData(self::ANIMATION_TYPE);
+        return $value !== null && $value !== '' ? (string) $value : self::ANIMATION_ZOOM_IN;
+    }
+
+    public function setAnimationType(string $animation): self
+    {
+        return $this->setData(self::ANIMATION_TYPE, $animation);
+    }
+
+    /* ===== Mobile (v1.2.0) ===== */
+
+    public function getMobileFallbackSeconds(): int
+    {
+        $value = $this->getData(self::MOBILE_FALLBACK_SECONDS);
+        return $value !== null ? (int) $value : 15;
+    }
+
+    public function setMobileFallbackSeconds(int $seconds): self
+    {
+        return $this->setData(self::MOBILE_FALLBACK_SECONDS, $seconds);
+    }
+
     public function getCreatedAt(): string
     {
         return (string) $this->getData(self::CREATED_AT);

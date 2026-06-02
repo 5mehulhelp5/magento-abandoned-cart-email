@@ -77,6 +77,16 @@
     }
 
     function attachExitIntent(rule) {
+        // Device-aware dispatch: mouseout works only on desktop. Touch
+        // devices need a different signal (tab switch + idle fallback).
+        if (config.device_type === 'desktop') {
+            attachDesktopExitIntent(rule);
+        } else {
+            attachMobileExitIntent(rule);
+        }
+    }
+
+    function attachDesktopExitIntent(rule) {
         var handler = function (e) {
             // Fire when mouse leaves the top of the viewport.
             if (e.clientY <= 0 && !shown) {
@@ -85,6 +95,33 @@
         };
         document.addEventListener('mouseout', handler);
         cleanupFns.push(function () { document.removeEventListener('mouseout', handler); });
+    }
+
+    function attachMobileExitIntent(rule) {
+        // Primary signal: visibilitychange (tab/app switch, screen lock).
+        // This is the most reliable "leaving" indicator on mobile browsers.
+        var visHandler = function () {
+            if (document.visibilityState === 'hidden' && !shown) {
+                showPopup(rule);
+            }
+        };
+        document.addEventListener('visibilitychange', visHandler);
+        cleanupFns.push(function () {
+            document.removeEventListener('visibilitychange', visHandler);
+        });
+
+        // Fallback: idle timer. Admin-configurable per rule (default 15s).
+        // Set to 0 in the rule to disable the fallback entirely.
+        var fallbackSec = parseInt(rule.mobile_fallback_seconds, 10);
+        if (isNaN(fallbackSec)) {
+            fallbackSec = 15;
+        }
+        if (fallbackSec > 0) {
+            var timer = setTimeout(function () {
+                if (!shown) { showPopup(rule); }
+            }, fallbackSec * 1000);
+            cleanupFns.push(function () { clearTimeout(timer); });
+        }
     }
 
     function attachTimeOnPage(rule) {
@@ -128,7 +165,10 @@
         var container = document.getElementById('etechflow-popup-container');
         if (!container) { return; }
         container.innerHTML = renderHtml(rule);
+        applyRuleStyles(container, rule);
         container.classList.add('is-open');
+        container.classList.add('etechflow-popup--' + (rule.template_layout || 'modal'));
+        container.classList.add('etechflow-popup--anim-' + (rule.animation_type || 'zoom_in'));
         document.body.classList.add('etechflow-popup-open');
 
         var ctaBtn = container.querySelector('.etechflow-popup__cta');
@@ -236,6 +276,13 @@
         var container = document.getElementById('etechflow-popup-container');
         if (container) {
             container.classList.remove('is-open');
+            // Strip layout + animation classes so the next show starts clean.
+            for (var i = container.classList.length - 1; i >= 0; i--) {
+                var cls = container.classList[i];
+                if (cls.indexOf('etechflow-popup--') === 0) {
+                    container.classList.remove(cls);
+                }
+            }
             // Defer DOM clear until the close animation has space to run.
             setTimeout(function () {
                 if (!container.classList.contains('is-open')) {
@@ -246,6 +293,23 @@
         document.body.classList.remove('etechflow-popup-open');
         cleanupFns.forEach(function (fn) { try { fn(); } catch (e) {} });
         cleanupFns = [];
+    }
+
+    /**
+     * Push admin-configured colors + dimensions onto the container as
+     * CSS custom properties. The stylesheet reads them via var() so
+     * the same rules work across all 4 layouts without inline styling
+     * on individual elements.
+     */
+    function applyRuleStyles(container, rule) {
+        var s = container.style;
+        s.setProperty('--etechflow-popup-bg',           rule.bg_color           || '#ffffff');
+        s.setProperty('--etechflow-popup-headline',     rule.headline_color     || '#0f172a');
+        s.setProperty('--etechflow-popup-body',         rule.body_color         || '#374151');
+        s.setProperty('--etechflow-popup-cta-bg',       rule.cta_bg_color       || '#0f172a');
+        s.setProperty('--etechflow-popup-cta-text',     rule.cta_text_color     || '#ffffff');
+        s.setProperty('--etechflow-popup-radius',       (parseInt(rule.border_radius, 10) || 12) + 'px');
+        s.setProperty('--etechflow-popup-width',        (parseInt(rule.dialog_width, 10) || 480) + 'px');
     }
 
     function renderHtml(rule) {

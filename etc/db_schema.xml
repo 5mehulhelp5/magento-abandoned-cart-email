@@ -371,6 +371,30 @@
         <column xsi:type="smallint" name="apply_to_guests" unsigned="true" nullable="false" default="1"
                 comment="Show to guest visitors (0/1)"/>
 
+        <!-- Visual design (v1.2.0) -->
+        <column xsi:type="varchar" name="template_layout" nullable="false" length="32" default="modal"
+                comment="Popup visual template: modal / slide_in / bottom_bar / top_bar"/>
+        <column xsi:type="varchar" name="bg_color" nullable="false" length="7" default="#ffffff"
+                comment="Popup background hex color"/>
+        <column xsi:type="varchar" name="headline_color" nullable="false" length="7" default="#0f172a"
+                comment="Headline text hex color"/>
+        <column xsi:type="varchar" name="body_color" nullable="false" length="7" default="#374151"
+                comment="Body text hex color"/>
+        <column xsi:type="varchar" name="cta_bg_color" nullable="false" length="7" default="#0f172a"
+                comment="CTA button background hex color"/>
+        <column xsi:type="varchar" name="cta_text_color" nullable="false" length="7" default="#ffffff"
+                comment="CTA button text hex color"/>
+        <column xsi:type="smallint" name="border_radius" unsigned="true" nullable="false" default="12"
+                comment="Rounded corners in pixels"/>
+        <column xsi:type="smallint" name="dialog_width" unsigned="true" nullable="false" default="480"
+                comment="Modal dialog width in pixels (modal layout only)"/>
+        <column xsi:type="varchar" name="animation_type" nullable="false" length="32" default="zoom_in"
+                comment="Entrance animation: fade_in / slide_up / zoom_in / bounce"/>
+
+        <!-- Mobile (v1.2.0) -->
+        <column xsi:type="smallint" name="mobile_fallback_seconds" unsigned="true" nullable="false" default="15"
+                comment="Mobile exit-intent fallback timer in seconds (0 = disabled)"/>
+
         <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
         <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
 

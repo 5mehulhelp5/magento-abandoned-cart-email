@@ -39,6 +39,33 @@ interface PopupRuleInterface
     public const FREQUENCY                     = 'frequency';
     public const MAX_IMPRESSIONS_PER_CUSTOMER  = 'max_impressions_per_customer';
     public const APPLY_TO_GUESTS               = 'apply_to_guests';
+
+    /* Visual design (v1.2.0) */
+    public const TEMPLATE_LAYOUT               = 'template_layout';
+    public const BG_COLOR                      = 'bg_color';
+    public const HEADLINE_COLOR                = 'headline_color';
+    public const BODY_COLOR                    = 'body_color';
+    public const CTA_BG_COLOR                  = 'cta_bg_color';
+    public const CTA_TEXT_COLOR                = 'cta_text_color';
+    public const BORDER_RADIUS                 = 'border_radius';
+    public const DIALOG_WIDTH                  = 'dialog_width';
+    public const ANIMATION_TYPE                = 'animation_type';
+
+    /* Mobile (v1.2.0) */
+    public const MOBILE_FALLBACK_SECONDS       = 'mobile_fallback_seconds';
+
+    /* Layout enum values */
+    public const LAYOUT_MODAL                  = 'modal';
+    public const LAYOUT_SLIDE_IN               = 'slide_in';
+    public const LAYOUT_BOTTOM_BAR             = 'bottom_bar';
+    public const LAYOUT_TOP_BAR                = 'top_bar';
+
+    /* Animation enum values */
+    public const ANIMATION_FADE_IN             = 'fade_in';
+    public const ANIMATION_SLIDE_UP            = 'slide_up';
+    public const ANIMATION_ZOOM_IN             = 'zoom_in';
+    public const ANIMATION_BOUNCE              = 'bounce';
+
     public const CREATED_AT                    = 'created_at';
     public const UPDATED_AT                    = 'updated_at';
 
@@ -180,6 +207,70 @@ interface PopupRuleInterface
 
     /** @return self */
     public function setApplyToGuests(bool $applyToGuests): self;
+
+    /* ===== Visual design (v1.2.0) ===== */
+
+    /** @return string */
+    public function getTemplateLayout(): string;
+
+    /** @return self */
+    public function setTemplateLayout(string $layout): self;
+
+    /** @return string */
+    public function getBgColor(): string;
+
+    /** @return self */
+    public function setBgColor(string $hex): self;
+
+    /** @return string */
+    public function getHeadlineColor(): string;
+
+    /** @return self */
+    public function setHeadlineColor(string $hex): self;
+
+    /** @return string */
+    public function getBodyColor(): string;
+
+    /** @return self */
+    public function setBodyColor(string $hex): self;
+
+    /** @return string */
+    public function getCtaBgColor(): string;
+
+    /** @return self */
+    public function setCtaBgColor(string $hex): self;
+
+    /** @return string */
+    public function getCtaTextColor(): string;
+
+    /** @return self */
+    public function setCtaTextColor(string $hex): self;
+
+    /** @return int */
+    public function getBorderRadius(): int;
+
+    /** @return self */
+    public function setBorderRadius(int $px): self;
+
+    /** @return int */
+    public function getDialogWidth(): int;
+
+    /** @return self */
+    public function setDialogWidth(int $px): self;
+
+    /** @return string */
+    public function getAnimationType(): string;
+
+    /** @return self */
+    public function setAnimationType(string $animation): self;
+
+    /* ===== Mobile (v1.2.0) ===== */
+
+    /** @return int */
+    public function getMobileFallbackSeconds(): int;
+
+    /** @return self */
+    public function setMobileFallbackSeconds(int $seconds): self;
 
     /** @return string */
     public function getCreatedAt(): string;

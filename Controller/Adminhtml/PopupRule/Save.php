@@ -111,6 +111,37 @@ class Save extends Action implements HttpPostActionInterface
         $rule->setApplyToGuests((bool) ($data['apply_to_guests'] ?? true));
         $rule->setFrequency((string) ($data['frequency'] ?? PopupRuleInterface::FREQUENCY_ONCE_PER_SESSION));
         $rule->setMaxImpressionsPerCustomer((int) ($data['max_impressions_per_customer'] ?? 3));
+
+        /* Visual design (v1.2.0) */
+        $rule->setTemplateLayout((string) ($data['template_layout'] ?? PopupRuleInterface::LAYOUT_MODAL));
+        $rule->setAnimationType((string) ($data['animation_type'] ?? PopupRuleInterface::ANIMATION_ZOOM_IN));
+        $rule->setBgColor($this->normalizeHexColor($data['bg_color'] ?? '#ffffff', '#ffffff'));
+        $rule->setHeadlineColor($this->normalizeHexColor($data['headline_color'] ?? '#0f172a', '#0f172a'));
+        $rule->setBodyColor($this->normalizeHexColor($data['body_color'] ?? '#374151', '#374151'));
+        $rule->setCtaBgColor($this->normalizeHexColor($data['cta_bg_color'] ?? '#0f172a', '#0f172a'));
+        $rule->setCtaTextColor($this->normalizeHexColor($data['cta_text_color'] ?? '#ffffff', '#ffffff'));
+        $rule->setBorderRadius((int) ($data['border_radius'] ?? 12));
+        $rule->setDialogWidth((int) ($data['dialog_width'] ?? 480));
+
+        /* Mobile (v1.2.0) */
+        $rule->setMobileFallbackSeconds((int) ($data['mobile_fallback_seconds'] ?? 15));
+    }
+
+    /**
+     * Accept only `#RRGGBB` (6-hex) or `#RGB` (3-hex) values. Anything else
+     * silently falls back to the supplied default — prevents broken CSS
+     * from typos or malicious input.
+     */
+    private function normalizeHexColor(?string $value, string $fallback): string
+    {
+        $value = trim((string) $value);
+        if ($value === '') {
+            return $fallback;
+        }
+        if (preg_match('/^#([0-9a-fA-F]{3}){1,2}$/', $value) === 1) {
+            return strtolower($value);
+        }
+        return $fallback;
     }
 
     /**

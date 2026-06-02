@@ -192,6 +192,22 @@
                 </select>
             </formElements>
         </field>
+
+        <field name="mobile_fallback_seconds" formElement="input">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="number">15</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Mobile Fallback Seconds</label>
+                <validation>
+                    <rule name="validate-zero-or-greater" xsi:type="boolean">true</rule>
+                </validation>
+                <notice translate="true">For exit-intent trigger on mobile devices: idle seconds before popup fires as a fallback (mobile doesn't have mouse-leave events). 0 disables the fallback. Default 15.</notice>
+            </settings>
+        </field>
     </fieldset>
 
     <!-- ============================================================ -->
@@ -255,6 +271,152 @@
                 <dataType>number</dataType>
                 <label translate="true">Linked Cart Price Rule ID</label>
                 <notice translate="true">When customer clicks the CTA, a coupon code is generated for this Cart Price Rule and applied to their cart. Create the rule under Marketing → Cart Price Rules and paste its ID here. Leave blank for non-discount popups.</notice>
+            </settings>
+        </field>
+    </fieldset>
+
+    <!-- ============================================================ -->
+    <!-- Visual Design (v1.2.0) -->
+    <!-- ============================================================ -->
+    <fieldset name="visual_design">
+        <settings>
+            <label translate="true">Visual Design</label>
+        </settings>
+
+        <field name="template_layout" formElement="select">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="string">modal</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Template Layout</label>
+                <notice translate="true">Visual variant. Modal = centered overlay. Slide-In = bottom-right corner. Bottom/Top Bar = full-width strip.</notice>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Etechflow\AbandonedCart\Model\Source\PopupTemplateLayout"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="animation_type" formElement="select">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="string">zoom_in</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Entrance Animation</label>
+                <notice translate="true">Animation applied when popup first appears.</notice>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Etechflow\AbandonedCart\Model\Source\PopupAnimationType"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="bg_color" formElement="input">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="string">#ffffff</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Background Color</label>
+                <notice translate="true">Hex color (e.g., #ffffff, #1e293b)</notice>
+            </settings>
+        </field>
+
+        <field name="headline_color" formElement="input">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="string">#0f172a</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Headline Color</label>
+                <notice translate="true">Hex color for the main heading text.</notice>
+            </settings>
+        </field>
+
+        <field name="body_color" formElement="input">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="string">#374151</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Body Text Color</label>
+                <notice translate="true">Hex color for the body paragraph text.</notice>
+            </settings>
+        </field>
+
+        <field name="cta_bg_color" formElement="input">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="string">#0f172a</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">CTA Button Background</label>
+                <notice translate="true">Hex color for the Call-To-Action button.</notice>
+            </settings>
+        </field>
+
+        <field name="cta_text_color" formElement="input">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="string">#ffffff</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">CTA Button Text Color</label>
+                <notice translate="true">Hex color for the CTA button text.</notice>
+            </settings>
+        </field>
+
+        <field name="border_radius" formElement="input">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="number">12</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Border Radius (px)</label>
+                <validation>
+                    <rule name="validate-zero-or-greater" xsi:type="boolean">true</rule>
+                </validation>
+                <notice translate="true">Rounded corner size for the popup container in pixels. 0 = square corners.</notice>
+            </settings>
+        </field>
+
+        <field name="dialog_width" formElement="input">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="number">480</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Dialog Width (px)</label>
+                <validation>
+                    <rule name="validate-greater-than-zero" xsi:type="boolean">true</rule>
+                </validation>
+                <notice translate="true">Max width of the popup container in pixels. Applies to Modal layout (Bar layouts span full width).</notice>
             </settings>
         </field>
     </fieldset>

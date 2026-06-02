@@ -111,16 +111,30 @@ class Get implements HttpGetActionInterface
     private function toPayload(PopupRuleInterface $rule): array
     {
         return [
-            'rule_id'        => (int) $rule->getRuleId(),
-            'trigger_type'   => $rule->getTriggerType(),
-            'trigger_value'  => $rule->getTriggerValue(),
-            'page_scope'     => $rule->getPageScope(),
-            'headline'       => $rule->getPopupHeadline(),
-            'body'           => $rule->getPopupBody(),
-            'cta_text'       => $rule->getPopupCtaText(),
-            'image_url'      => $rule->getPopupImageUrl(),
-            'has_discount'   => $rule->getSalesRuleId() !== null && $rule->getSalesRuleId() > 0,
-            'frequency'      => $rule->getFrequency(),
+            'rule_id'                 => (int) $rule->getRuleId(),
+            'trigger_type'            => $rule->getTriggerType(),
+            'trigger_value'           => $rule->getTriggerValue(),
+            'page_scope'              => $rule->getPageScope(),
+            'headline'                => $rule->getPopupHeadline(),
+            'body'                    => $rule->getPopupBody(),
+            'cta_text'                => $rule->getPopupCtaText(),
+            'image_url'               => $rule->getPopupImageUrl(),
+            'has_discount'            => $rule->getSalesRuleId() !== null && $rule->getSalesRuleId() > 0,
+            'frequency'               => $rule->getFrequency(),
+
+            /* Visual design (v1.2.0) */
+            'template_layout'         => $rule->getTemplateLayout(),
+            'animation_type'          => $rule->getAnimationType(),
+            'bg_color'                => $rule->getBgColor(),
+            'headline_color'          => $rule->getHeadlineColor(),
+            'body_color'              => $rule->getBodyColor(),
+            'cta_bg_color'            => $rule->getCtaBgColor(),
+            'cta_text_color'          => $rule->getCtaTextColor(),
+            'border_radius'           => $rule->getBorderRadius(),
+            'dialog_width'            => $rule->getDialogWidth(),
+
+            /* Mobile (v1.2.0) */
+            'mobile_fallback_seconds' => $rule->getMobileFallbackSeconds(),
         ];
     }
 }
