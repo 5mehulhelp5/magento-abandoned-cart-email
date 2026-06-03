@@ -33,3 +33,6 @@ auth.json
 dist/
 *.zip
 *.tar.gz
+
+# Extracted reference materials (the .zip itself is the source of truth)
+docs/specs/store-portal-admin-extracted/

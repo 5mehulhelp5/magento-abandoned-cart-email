@@ -1,0 +1,151 @@
+<?php
+/**
+ * Etechflow_AbandonedCart - License gate page (admin-only).
+ *
+ * Shows 3 plan cards (weekly / monthly / yearly) from system config.
+ * Customer clicks a plan → inline form for name+email → POST to
+ * `/etechflow_abandonedcart/license/checkout` → Stripe Checkout redirect.
+ *
+ * @var \Etechflow\AbandonedCart\Block\Adminhtml\License\Gate $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+$weeklyPrice  = $block->getWeeklyPrice();
+$monthlyPrice = $block->getMonthlyPrice();
+$yearlyPrice  = $block->getYearlyPrice();
+
+$weeklyLabel  = $block->getWeeklyLabel();
+$monthlyLabel = $block->getMonthlyLabel();
+$yearlyLabel  = $block->getYearlyLabel();
+
+$checkoutUrl = $block->getCheckoutUrl();
+$settingsUrl = $block->getSettingsUrl();
+?>
+<style>
+    .etf-gate-wrap { padding: 40px 20px; background: #0f172a; color: #e2e8f0; min-height: 100vh; margin: -20px -30px; }
+    .etf-gate-header { text-align: center; margin-bottom: 40px; }
+    .etf-gate-header h1 { color: #ffffff; font-size: 32px; margin: 0 0 12px; font-weight: 700; }
+    .etf-gate-header p { color: #94a3b8; font-size: 16px; max-width: 640px; margin: 0 auto; }
+    .etf-plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1100px; margin: 0 auto 32px; }
+    .etf-plan { background: #1e293b; border: 2px solid #334155; border-radius: 12px; padding: 28px 24px; text-align: center; transition: transform 0.2s, border-color 0.2s; }
+    .etf-plan:hover { transform: translateY(-4px); border-color: #3b82f6; }
+    .etf-plan.featured { border-color: #f59e0b; position: relative; }
+    .etf-plan.featured::before { content: 'BEST VALUE'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #f59e0b; color: #0f172a; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 12px; letter-spacing: 1px; }
+    .etf-plan h3 { color: #ffffff; font-size: 22px; margin: 0 0 16px; font-weight: 600; }
+    .etf-plan .price { font-size: 38px; font-weight: 700; color: #fbbf24; margin: 0 0 4px; }
+    .etf-plan .price-period { font-size: 14px; color: #94a3b8; margin-bottom: 24px; }
+    .etf-plan ul { list-style: none; padding: 0; margin: 0 0 24px; text-align: left; }
+    .etf-plan ul li { padding: 8px 0; padding-left: 24px; position: relative; color: #cbd5e1; font-size: 14px; }
+    .etf-plan ul li::before { content: '✓'; position: absolute; left: 0; color: #10b981; font-weight: bold; }
+    .etf-plan button { background: #3b82f6; color: #ffffff; border: 0; border-radius: 8px; padding: 12px 24px; width: 100%; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+    .etf-plan button:hover { background: #2563eb; }
+    .etf-plan.featured button { background: #f59e0b; color: #0f172a; }
+    .etf-plan.featured button:hover { background: #fbbf24; }
+    .etf-divider { text-align: center; color: #64748b; margin: 32px 0; position: relative; }
+    .etf-divider::before, .etf-divider::after { content: ''; position: absolute; top: 50%; width: 35%; height: 1px; background: #334155; }
+    .etf-divider::before { left: 0; }
+    .etf-divider::after { right: 0; }
+    .etf-divider span { background: #0f172a; padding: 0 16px; font-size: 13px; letter-spacing: 1px; }
+    .etf-manual { text-align: center; }
+    .etf-manual a { display: inline-block; color: #e2e8f0; background: #1e293b; border: 1px solid #334155; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-size: 14px; }
+    .etf-manual a:hover { background: #334155; color: #ffffff; }
+    .etf-form { display: none; max-width: 480px; margin: 32px auto 0; background: #1e293b; padding: 28px; border-radius: 12px; border: 2px solid #3b82f6; }
+    .etf-form.show { display: block; }
+    .etf-form h2 { color: #ffffff; margin: 0 0 8px; font-size: 18px; }
+    .etf-form .plan-selected { color: #fbbf24; font-weight: 600; margin: 0 0 20px; font-size: 14px; }
+    .etf-form label { display: block; color: #cbd5e1; font-size: 13px; margin: 12px 0 4px; }
+    .etf-form input[type="text"], .etf-form input[type="email"] { width: 100%; padding: 10px 12px; border: 1px solid #334155; background: #0f172a; color: #f1f5f9; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
+    .etf-form input:focus { outline: none; border-color: #3b82f6; }
+    .etf-form-buttons { margin-top: 20px; display: flex; gap: 12px; }
+    .etf-form-buttons button[type="submit"] { flex: 1; background: #10b981; color: #ffffff; border: 0; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; }
+    .etf-form-buttons button[type="button"] { background: #475569; color: #e2e8f0; border: 0; padding: 12px 20px; border-radius: 8px; cursor: pointer; }
+</style>
+
+<div class="etf-gate-wrap">
+    <div class="etf-gate-header">
+        <h1><?= $escaper->escapeHtml(__('Activate Your License')) ?></h1>
+        <p><?= $escaper->escapeHtml(__('Choose a subscription plan to unlock the Abandoned Cart Email + Exit-Intent Popup extension. Cancel anytime — your data stays safe.')) ?></p>
+    </div>
+
+    <div class="etf-plans">
+        <div class="etf-plan">
+            <h3><?= $escaper->escapeHtml($weeklyLabel) ?></h3>
+            <div class="price"><?= $escaper->escapeHtml($block->formatPrice($weeklyPrice)) ?></div>
+            <div class="price-period"><?= $escaper->escapeHtml(__('per week')) ?></div>
+            <ul>
+                <li><?= $escaper->escapeHtml(__('Try it short-term')) ?></li>
+                <li><?= $escaper->escapeHtml(__('Cancel anytime')) ?></li>
+                <li><?= $escaper->escapeHtml(__('Full feature access')) ?></li>
+            </ul>
+            <button type="button" onclick="etfShowForm('weekly','<?= $escaper->escapeJs($weeklyLabel) ?>','<?= $escaper->escapeJs($block->formatPrice($weeklyPrice)) ?>/week')">
+                <?= $escaper->escapeHtml(__('Subscribe Weekly')) ?>
+            </button>
+        </div>
+
+        <div class="etf-plan featured">
+            <h3><?= $escaper->escapeHtml($monthlyLabel) ?></h3>
+            <div class="price"><?= $escaper->escapeHtml($block->formatPrice($monthlyPrice)) ?></div>
+            <div class="price-period"><?= $escaper->escapeHtml(__('per month')) ?></div>
+            <ul>
+                <li><?= $escaper->escapeHtml(__('Most popular')) ?></li>
+                <li><?= $escaper->escapeHtml(__('Cancel anytime')) ?></li>
+                <li><?= $escaper->escapeHtml(__('Full feature access')) ?></li>
+            </ul>
+            <button type="button" onclick="etfShowForm('monthly','<?= $escaper->escapeJs($monthlyLabel) ?>','<?= $escaper->escapeJs($block->formatPrice($monthlyPrice)) ?>/mo')">
+                <?= $escaper->escapeHtml(__('Subscribe Monthly')) ?>
+            </button>
+        </div>
+
+        <div class="etf-plan">
+            <h3><?= $escaper->escapeHtml($yearlyLabel) ?></h3>
+            <div class="price"><?= $escaper->escapeHtml($block->formatPrice($yearlyPrice)) ?></div>
+            <div class="price-period"><?= $escaper->escapeHtml(__('per year — save vs monthly')) ?></div>
+            <ul>
+                <li><?= $escaper->escapeHtml(__('Best long-term value')) ?></li>
+                <li><?= $escaper->escapeHtml(__('Pay once, use all year')) ?></li>
+                <li><?= $escaper->escapeHtml(__('Full feature access')) ?></li>
+            </ul>
+            <button type="button" onclick="etfShowForm('yearly','<?= $escaper->escapeJs($yearlyLabel) ?>','<?= $escaper->escapeJs($block->formatPrice($yearlyPrice)) ?>/yr')">
+                <?= $escaper->escapeHtml(__('Subscribe Yearly')) ?>
+            </button>
+        </div>
+    </div>
+
+    <form id="etf-checkout-form" class="etf-form" method="POST" action="<?= $escaper->escapeUrl($checkoutUrl) ?>">
+        <h2><?= $escaper->escapeHtml(__('Continue to Checkout')) ?></h2>
+        <div class="plan-selected" id="etf-plan-summary"></div>
+        <input type="hidden" name="plan" id="etf-plan-input" value="">
+        <?= $block->getBlockHtml('formkey') ?>
+
+        <label for="etf-name"><?= $escaper->escapeHtml(__('Your Name')) ?></label>
+        <input type="text" name="name" id="etf-name" required maxlength="255">
+
+        <label for="etf-email"><?= $escaper->escapeHtml(__('Billing Email')) ?></label>
+        <input type="email" name="email" id="etf-email" required maxlength="255">
+
+        <div class="etf-form-buttons">
+            <button type="submit"><?= $escaper->escapeHtml(__('Continue to Stripe Checkout')) ?></button>
+            <button type="button" onclick="etfHideForm()"><?= $escaper->escapeHtml(__('Cancel')) ?></button>
+        </div>
+    </form>
+
+    <div class="etf-divider"><span><?= $escaper->escapeHtml(__('OR')) ?></span></div>
+
+    <div class="etf-manual">
+        <a href="<?= $escaper->escapeUrl($settingsUrl) ?>"><?= $escaper->escapeHtml(__('Already have a License Key? Enter it manually →')) ?></a>
+    </div>
+</div>
+
+<script>
+    function etfShowForm(plan, label, priceText) {
+        document.getElementById('etf-plan-input').value = plan;
+        document.getElementById('etf-plan-summary').textContent = label + ' — ' + priceText;
+        var form = document.getElementById('etf-checkout-form');
+        form.classList.add('show');
+        form.scrollIntoView({behavior: 'smooth', block: 'center'});
+        document.getElementById('etf-name').focus();
+    }
+    function etfHideForm() {
+        document.getElementById('etf-checkout-form').classList.remove('show');
+    }
+</script>

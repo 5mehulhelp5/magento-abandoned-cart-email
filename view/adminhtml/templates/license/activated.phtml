@@ -1,0 +1,108 @@
+<?php
+/**
+ * Etechflow_AbandonedCart - Post-activation success/error page.
+ *
+ * Two states based on $block->isSuccess():
+ *   - SUCCESS: SP-XXXX key + copy button + cache-flush note + management link
+ *   - ERROR: explanation + retry link to gate
+ *
+ * @var \Etechflow\AbandonedCart\Block\Adminhtml\License\Activated $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+?>
+<style>
+    .etf-result-wrap { padding: 60px 20px; background: #0f172a; color: #e2e8f0; min-height: 100vh; margin: -20px -30px; display: flex; align-items: center; justify-content: center; }
+    .etf-result-card { background: #1e293b; border-radius: 16px; padding: 48px 40px; max-width: 560px; width: 100%; text-align: center; }
+    .etf-result-card.success { border: 2px solid #10b981; }
+    .etf-result-card.error { border: 2px solid #ef4444; }
+    .etf-icon { font-size: 64px; margin: 0 0 16px; }
+    .etf-icon.success { color: #10b981; }
+    .etf-icon.error { color: #ef4444; }
+    .etf-result-card h1 { color: #ffffff; font-size: 26px; margin: 0 0 12px; }
+    .etf-result-card p { color: #cbd5e1; font-size: 15px; line-height: 1.55; margin: 0 0 16px; }
+    .etf-key-box { background: #0f172a; border: 2px dashed #f59e0b; border-radius: 8px; padding: 16px; margin: 24px 0; word-break: break-all; }
+    .etf-key-box .label { color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .etf-key-box .value { color: #fbbf24; font-family: 'Courier New', monospace; font-size: 16px; font-weight: 600; }
+    .etf-copy-btn { background: #3b82f6; color: #ffffff; border: 0; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; margin-top: 12px; }
+    .etf-copy-btn:hover { background: #2563eb; }
+    .etf-copy-btn.copied { background: #10b981; }
+    .etf-actions { margin-top: 32px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .etf-actions a { background: #475569; color: #f1f5f9; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; font-size: 14px; }
+    .etf-actions a.primary { background: #10b981; color: #ffffff; }
+    .etf-actions a:hover { opacity: 0.9; }
+    .etf-flush-note { background: #1e3a5f; border-left: 3px solid #3b82f6; padding: 12px 16px; border-radius: 4px; margin: 24px 0; text-align: left; font-size: 13px; color: #cbd5e1; }
+    .etf-error-detail { background: #3f1d1d; border-left: 3px solid #ef4444; padding: 12px 16px; border-radius: 4px; margin: 16px 0; text-align: left; font-size: 13px; color: #fca5a5; }
+</style>
+
+<?php if ($block->isSuccess()): ?>
+    <div class="etf-result-wrap">
+        <div class="etf-result-card success">
+            <div class="etf-icon success">✓</div>
+            <h1><?= $escaper->escapeHtml(__('License Activated!')) ?></h1>
+            <p><?= $escaper->escapeHtml(__('Your %1 subscription is active. The license key has been saved to your store configuration automatically.', ucfirst($block->getPlan()))) ?></p>
+
+            <div class="etf-key-box">
+                <div class="label"><?= $escaper->escapeHtml(__('Your License Key')) ?></div>
+                <div class="value" id="etf-license-key"><?= $escaper->escapeHtml($block->getLicenseKey()) ?></div>
+                <button type="button" class="etf-copy-btn" onclick="etfCopyKey(this)">
+                    <?= $escaper->escapeHtml(__('Copy to Clipboard')) ?>
+                </button>
+            </div>
+
+            <div class="etf-flush-note">
+                <strong><?= $escaper->escapeHtml(__('Next step:')) ?></strong>
+                <?= $escaper->escapeHtml(__('Flush the cache so the license becomes active immediately:')) ?>
+                <code style="display: block; margin-top: 8px; background: #0f172a; padding: 8px; border-radius: 4px; color: #fbbf24;">bin/magento cache:flush</code>
+            </div>
+
+            <div class="etf-actions">
+                <a href="<?= $escaper->escapeUrl($block->getManagementUrl()) ?>" class="primary">
+                    <?= $escaper->escapeHtml(__('Go to Abandoned Carts →')) ?>
+                </a>
+                <a href="<?= $escaper->escapeUrl($block->getSettingsUrl()) ?>">
+                    <?= $escaper->escapeHtml(__('View Configuration')) ?>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function etfCopyKey(btn) {
+            var key = document.getElementById('etf-license-key').textContent.trim();
+            navigator.clipboard.writeText(key).then(function () {
+                btn.textContent = '<?= $escaper->escapeJs(__('Copied!')) ?>';
+                btn.classList.add('copied');
+                setTimeout(function () {
+                    btn.textContent = '<?= $escaper->escapeJs(__('Copy to Clipboard')) ?>';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+    </script>
+<?php else: ?>
+    <div class="etf-result-wrap">
+        <div class="etf-result-card error">
+            <div class="etf-icon error">⚠</div>
+            <h1><?= $escaper->escapeHtml(__('Activation Issue')) ?></h1>
+            <p><?= $escaper->escapeHtml(__('Your payment may have been processed, but we could not activate the license automatically. The most common causes are listed below.')) ?></p>
+
+            <div class="etf-error-detail">
+                <strong><?= $escaper->escapeHtml(__('Error detail:')) ?></strong>
+                <?= $escaper->escapeHtml((string) $block->getErrorMessage()) ?>
+            </div>
+
+            <p style="font-size: 13px; color: #94a3b8;">
+                <?= $escaper->escapeHtml(__('Common causes: Portal URL incorrect, Stripe key mismatch, network timeout. Contact ETechFlow support with the error above if the issue persists.')) ?>
+            </p>
+
+            <div class="etf-actions">
+                <a href="<?= $escaper->escapeUrl($block->getGateUrl()) ?>" class="primary">
+                    <?= $escaper->escapeHtml(__('Try Again')) ?>
+                </a>
+                <a href="<?= $escaper->escapeUrl($block->getSettingsUrl()) ?>">
+                    <?= $escaper->escapeHtml(__('Check Configuration')) ?>
+                </a>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>

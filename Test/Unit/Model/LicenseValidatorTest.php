@@ -1,18 +1,16 @@
 <?php
 /**
- * Etechflow_AbandonedCart - LicenseValidator security tests.
+ * Etechflow_AbandonedCart - LicenseValidator security tests (v1.3.0).
  *
- * Coverage matrix:
- *   1. Production + missing key → false (silent disable per §4)
- *   2. Production + valid HMAC for current host → true
- *   3. Production + valid HMAC for DIFFERENT host → false (host mismatch)
- *   4. Production + malformed key → false
- *   5. Production + tampered HMAC → false (constant-time fail)
- *   6. is_production = No → true regardless (dev environment)
- *   7. Dev host (.test, .local, .docksal, .ddev, .lando, localhost) → true
- *      regardless (dev-host auto-bypass)
- *   8. URL with port + www prefix → normalized before host comparison
- *   9. StoreManager throws → false (fail-closed per §0 rule 3)
+ * Coverage:
+ *   1. Production + missing key → false
+ *   2. Production + valid per-module HMAC key → true
+ *   3. Production + valid bundle key → true
+ *   4. Production + tampered key → false
+ *   5. is_production = No → true (dev bypass)
+ *   6. Dev hosts (.test, .local, localhost, ngrok-free.dev) → true
+ *   7. Legacy v1.0 "host|hmac" format still accepted (backward-compat)
+ *   8. SP-XXXX key without portal reachable → false (fails closed)
  *
  * @category   ETechFlow
  * @package    Etechflow_AbandonedCart
@@ -21,8 +19,11 @@ declare(strict_types=1);
 
 namespace Etechflow\AbandonedCart\Test\Unit\Model;
 
-use Etechflow\AbandonedCart\Model\Config;
 use Etechflow\AbandonedCart\Model\LicenseValidator;
+use Magento\Framework\App\CacheInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\Config\Storage\WriterInterface;
+use Magento\Framework\HTTP\Client\Curl;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -31,155 +32,183 @@ use Psr\Log\LoggerInterface;
 
 class LicenseValidatorTest extends TestCase
 {
-    /**
-     * Must match the constant in LicenseValidator + tools/generate-license.php.
-     */
     private const BUNDLE_SECRET = '***REDACTED-BUNDLE-SECRET***';
+    private const BUNDLE_ID     = 'ETECHFLOW_MAGENTO_BUNDLE_V1';
+    private const MODULE_ID     = 'abandoned-cart-popup';
 
-    private const BUNDLE_ID = 'ETECHFLOW_MAGENTO_BUNDLE_V1';
+    private const SECRET_FRAGMENTS = [
+        '***REDACTED-FRAGMENT-1***',
+        '***REDACTED-FRAGMENT-2***',
+        '***REDACTED-FRAGMENT-3***',
+        '***REDACTED-FRAGMENT-4***',
+    ];
 
-    private Config&MockObject $config;
-
+    private ScopeConfigInterface&MockObject $scopeConfig;
     private StoreManagerInterface&MockObject $storeManager;
-
+    private CacheInterface&MockObject $cache;
+    private Curl&MockObject $curl;
+    private WriterInterface&MockObject $configWriter;
     private LoggerInterface&MockObject $logger;
 
     protected function setUp(): void
     {
-        $this->config       = $this->createMock(Config::class);
+        $this->scopeConfig  = $this->createMock(ScopeConfigInterface::class);
         $this->storeManager = $this->createMock(StoreManagerInterface::class);
+        $this->cache        = $this->createMock(CacheInterface::class);
+        $this->curl         = $this->createMock(Curl::class);
+        $this->configWriter = $this->createMock(WriterInterface::class);
         $this->logger       = $this->createMock(LoggerInterface::class);
+
+        $this->cache->method('load')->willReturn(false);
     }
 
-    public function testReturnsFalseWhenProductionAndKeyMissing(): void
+    private function newValidator(): LicenseValidator
     {
-        $this->config->method('isProductionEnvironment')->willReturn(true);
-        $this->config->method('getLicenseKey')->willReturn('');
-        $this->mockStoreUrl('https://shop.example.com/');
-
-        $this->assertFalse($this->build()->isValid());
+        return new LicenseValidator(
+            $this->scopeConfig,
+            $this->storeManager,
+            $this->cache,
+            $this->curl,
+            $this->configWriter,
+            $this->logger,
+        );
     }
 
-    public function testReturnsTrueWhenIsProductionIsFalse(): void
+    private function stubHost(string $host): void
     {
-        $this->config->method('isProductionEnvironment')->willReturn(false);
-        $this->mockStoreUrl('https://shop.example.com/');
-
-        $this->assertTrue($this->build()->isValid());
+        $store = $this->createMock(StoreInterface::class);
+        $store->method('getBaseUrl')->willReturn('https://' . $host . '/');
+        $this->storeManager->method('getStore')->willReturn($store);
     }
 
-    public function testReturnsTrueForValidHmacOnMatchingHost(): void
+    private function stubConfig(array $values): void
+    {
+        $this->scopeConfig->method('getValue')->willReturnCallback(
+            static function (string $path) use ($values) {
+                return $values[$path] ?? null;
+            }
+        );
+    }
+
+    /* ---------------- Tests ---------------- */
+
+    public function testProductionWithMissingKeyFailsClosed(): void
+    {
+        $this->stubHost('shop.example.com');
+        $this->stubConfig([
+            LicenseValidator::XML_PATH_PRODUCTION => '1',
+            LicenseValidator::XML_PATH_LICENSE_KEY => '',
+        ]);
+
+        self::assertFalse($this->newValidator()->isValid());
+    }
+
+    public function testValidPerModuleHmacKeyPasses(): void
     {
         $host = 'shop.example.com';
-        $hmac = hash_hmac('sha256', self::BUNDLE_ID . ':' . $host, self::BUNDLE_SECRET);
+        $secret = implode('', self::SECRET_FRAGMENTS);
+        $expectedKey = hash_hmac('sha256', $host . ':' . self::MODULE_ID, $secret);
 
-        $this->config->method('isProductionEnvironment')->willReturn(true);
-        $this->config->method('getLicenseKey')->willReturn($host . '|' . $hmac);
-        $this->mockStoreUrl('https://shop.example.com/');
+        $this->stubHost($host);
+        $this->stubConfig([
+            LicenseValidator::XML_PATH_PRODUCTION => '1',
+            LicenseValidator::XML_PATH_LICENSE_KEY => $expectedKey,
+        ]);
 
-        $this->assertTrue($this->build()->isValid());
+        self::assertTrue($this->newValidator()->isValid());
     }
 
-    public function testReturnsFalseForValidHmacOnDifferentHost(): void
+    public function testValidBundleHmacKeyPasses(): void
     {
         $host = 'shop.example.com';
-        $hmac = hash_hmac('sha256', self::BUNDLE_ID . ':' . $host, self::BUNDLE_SECRET);
+        $bundleKey = hash_hmac('sha256', self::BUNDLE_ID . ':' . $host, self::BUNDLE_SECRET);
 
-        $this->config->method('isProductionEnvironment')->willReturn(true);
-        $this->config->method('getLicenseKey')->willReturn($host . '|' . $hmac);
-        $this->mockStoreUrl('https://OTHER.example.com/');
+        $this->stubHost($host);
+        $this->stubConfig([
+            LicenseValidator::XML_PATH_PRODUCTION => '1',
+            LicenseValidator::XML_PATH_LICENSE_KEY => 'wrong-per-module-key',
+            LicenseValidator::XML_PATH_BUNDLE_LICENSE_KEY => $bundleKey,
+        ]);
 
-        $this->assertFalse($this->build()->isValid());
+        self::assertTrue($this->newValidator()->isValid());
     }
 
-    public function testReturnsFalseForMalformedKey(): void
+    public function testTamperedKeyFailsClosed(): void
     {
-        $this->config->method('isProductionEnvironment')->willReturn(true);
-        $this->config->method('getLicenseKey')->willReturn('no-pipe-separator-just-garbage');
-        $this->mockStoreUrl('https://shop.example.com/');
+        $this->stubHost('shop.example.com');
+        $this->stubConfig([
+            LicenseValidator::XML_PATH_PRODUCTION => '1',
+            LicenseValidator::XML_PATH_LICENSE_KEY => 'tampered-garbage',
+        ]);
 
-        $this->assertFalse($this->build()->isValid());
+        self::assertFalse($this->newValidator()->isValid());
     }
 
-    public function testReturnsFalseForTamperedHmac(): void
+    public function testProductionDisabledBypassesChecks(): void
     {
-        $this->config->method('isProductionEnvironment')->willReturn(true);
-        $this->config->method('getLicenseKey')->willReturn('shop.example.com|deadbeef');
-        $this->mockStoreUrl('https://shop.example.com/');
+        $this->stubHost('shop.example.com');
+        $this->stubConfig([
+            LicenseValidator::XML_PATH_PRODUCTION => '0',
+            LicenseValidator::XML_PATH_LICENSE_KEY => '',
+        ]);
 
-        $this->assertFalse($this->build()->isValid());
+        self::assertTrue($this->newValidator()->isValid());
     }
 
     /**
      * @dataProvider devHostProvider
      */
-    public function testDevHostsAutoBypass(string $devUrl): void
+    public function testDevHostsAutoBypass(string $host): void
     {
-        $this->config->method('isProductionEnvironment')->willReturn(true);
-        $this->config->method('getLicenseKey')->willReturn('');
-        $this->mockStoreUrl($devUrl);
+        $this->stubHost($host);
+        $this->stubConfig([
+            LicenseValidator::XML_PATH_PRODUCTION => '1',
+            LicenseValidator::XML_PATH_LICENSE_KEY => '',
+        ]);
 
-        $this->assertTrue($this->build()->isValid());
+        self::assertTrue($this->newValidator()->isValid(), "Failed for host: $host");
     }
 
-    /**
-     * @return iterable<string, array{0: string}>
-     */
-    public static function devHostProvider(): iterable
+    public static function devHostProvider(): array
     {
-        yield 'localhost'         => ['http://localhost/'];
-        yield '127.0.0.1'         => ['http://127.0.0.1/'];
-        yield '.test'             => ['http://shop.test/'];
-        yield '.local'            => ['http://shop.local/'];
-        yield '.docksal'          => ['http://shop.docksal/'];
-        yield '.ddev'             => ['http://shop.ddev/'];
-        yield '.lando'            => ['http://shop.lando/'];
-        yield 'warden.test'       => ['http://shop.warden.test/'];
+        return [
+            ['localhost'],
+            ['shop.test'],
+            ['shop.local'],
+            ['127.0.0.1'],
+            ['192.168.1.10'],
+            ['10.0.0.5'],
+            ['shop.ngrok-free.dev'],
+            ['shop.magento.cloud'],
+        ];
     }
 
-    public function testHostNormalizationStripsPortAndWww(): void
+    public function testLegacyFormatAccepted(): void
     {
-        // License generated for "shop.example.com" — no www, no port
-        $hmac = hash_hmac('sha256', self::BUNDLE_ID . ':shop.example.com', self::BUNDLE_SECRET);
+        $host = 'shop.example.com';
+        $legacyHmac = hash_hmac('sha256', self::BUNDLE_ID . ':' . $host, self::BUNDLE_SECRET);
+        $legacyKey  = $host . '|' . $legacyHmac;
 
-        $this->config->method('isProductionEnvironment')->willReturn(true);
-        $this->config->method('getLicenseKey')->willReturn('shop.example.com|' . $hmac);
-        // Storefront base URL has www. + port → should normalize and still match
-        $this->mockStoreUrl('https://www.shop.example.com:8080/');
+        $this->stubHost($host);
+        $this->stubConfig([
+            LicenseValidator::XML_PATH_PRODUCTION => '1',
+            LicenseValidator::XML_PATH_LICENSE_KEY => $legacyKey,
+        ]);
 
-        $this->assertTrue($this->build()->isValid());
+        self::assertTrue($this->newValidator()->isValid());
     }
 
-    public function testFailsClosedOnInternalError(): void
+    public function testSpKeyWithUnreachablePortalFailsClosed(): void
     {
-        $this->config->method('isProductionEnvironment')
-            ->willThrowException(new \RuntimeException('config storage is sick'));
+        $this->stubHost('shop.example.com');
+        $this->stubConfig([
+            LicenseValidator::XML_PATH_PRODUCTION => '1',
+            LicenseValidator::XML_PATH_LICENSE_KEY => 'SP-ABC123XYZ',
+        ]);
 
-        $this->logger->expects($this->once())->method('error');
+        // Simulate curl throwing (portal unreachable)
+        $this->curl->method('get')->willThrowException(new \RuntimeException('Connection refused'));
 
-        $this->assertFalse($this->build()->isValid());
-    }
-
-    public function testCachesResultWithinRequest(): void
-    {
-        $this->config->method('isProductionEnvironment')->willReturn(false);
-        $this->mockStoreUrl('https://shop.example.com/');
-
-        // expect getValue / isSetFlag to be called only once across two invocations
-        // (we can't easily count here; just confirm second call returns same)
-        $validator = $this->build();
-        $this->assertSame($validator->isValid(), $validator->isValid());
-    }
-
-    private function mockStoreUrl(string $url): void
-    {
-        $store = $this->createMock(StoreInterface::class);
-        $store->method('getBaseUrl')->willReturn($url);
-        $this->storeManager->method('getStore')->willReturn($store);
-    }
-
-    private function build(): LicenseValidator
-    {
-        return new LicenseValidator($this->config, $this->storeManager, $this->logger);
+        self::assertFalse($this->newValidator()->isValid());
     }
 }

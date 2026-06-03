@@ -15,9 +15,11 @@ declare(strict_types=1);
 
 namespace Etechflow\AbandonedCart\Controller\Adminhtml\Cart;
 
+use Etechflow\AbandonedCart\Model\LicenseValidator;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\View\Result\PageFactory;
 
 class Index extends Action implements HttpGetActionInterface
@@ -27,12 +29,19 @@ class Index extends Action implements HttpGetActionInterface
     public function __construct(
         Context $context,
         private readonly PageFactory $pageFactory,
+        private readonly LicenseValidator $licenseValidator,
     ) {
         parent::__construct($context);
     }
 
     public function execute()
     {
+        if (!$this->licenseValidator->isValid()) {
+            return $this->resultFactory
+                ->create(ResultFactory::TYPE_REDIRECT)
+                ->setPath('etechflow_abandonedcart/license/gate');
+        }
+
         $page = $this->pageFactory->create();
         $page->setActiveMenu('Etechflow_AbandonedCart::carts');
         $page->getConfig()->getTitle()->prepend(__('Abandoned Carts'));

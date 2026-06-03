@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - License gate page layout.
+ *
+ * Renders the plan-cards page when an admin tries to access a gated
+ * landing controller without a valid license.
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="styles"/>
+    <body>
+        <referenceContainer name="content">
+            <block class="Etechflow\AbandonedCart\Block\Adminhtml\License\Gate"
+                   name="etechflow.abc.license.gate"
+                   template="Etechflow_AbandonedCart::license/gate.phtml"
+                   cacheable="false"/>
+        </referenceContainer>
+    </body>
+</page>

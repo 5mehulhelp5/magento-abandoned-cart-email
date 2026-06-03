@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Etechflow_AbandonedCart - Post-activation result page layout.
+ *
+ * Renders success (with key + copy button) or error (with retry link)
+ * after Stripe redirects back from the checkout flow.
+ *
+ * @category   ETechFlow
+ * @package    Etechflow_AbandonedCart
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="styles"/>
+    <body>
+        <referenceContainer name="content">
+            <block class="Etechflow\AbandonedCart\Block\Adminhtml\License\Activated"
+                   name="etechflow.abc.license.activated"
+                   template="Etechflow_AbandonedCart::license/activated.phtml"
+                   cacheable="false"/>
+        </referenceContainer>
+    </body>
+</page>

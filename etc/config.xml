@@ -69,7 +69,30 @@
             <license>
                 <key></key>
                 <is_production>1</is_production>
+                <!-- Portal validation (v1.3.0) -->
+                <issued_key></issued_key>
+                <issued_at>0</issued_at>
+                <ip_blocked>0</ip_blocked>
+                <portal_url>https://license.etechflow.com/license/validate</portal_url>
+                <bundle_license_key></bundle_license_key>
             </license>
+
+            <!-- Stripe payment for in-admin checkout (v1.3.0) -->
+            <payment>
+                <stripe_secret_key></stripe_secret_key>
+                <stripe_publishable_key></stripe_publishable_key>
+                <stripe_currency>usd</stripe_currency>
+            </payment>
+
+            <!-- Subscription plan prices (admin-editable, used to build Stripe checkout amounts) -->
+            <plans>
+                <weekly_price>9</weekly_price>
+                <monthly_price>29</monthly_price>
+                <yearly_price>290</yearly_price>
+                <weekly_label>Weekly</weekly_label>
+                <monthly_label>Monthly</monthly_label>
+                <yearly_label>Yearly (best value)</yearly_label>
+            </plans>
 
         </etechflow_abandoned_cart>
     </default>

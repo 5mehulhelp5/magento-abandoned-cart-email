@@ -12,9 +12,11 @@ declare(strict_types=1);
 
 namespace Etechflow\AbandonedCart\Controller\Adminhtml\Report;
 
+use Etechflow\AbandonedCart\Model\LicenseValidator;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Registry;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Framework\View\Result\PageFactory;
@@ -30,12 +32,19 @@ class Index extends Action implements HttpGetActionInterface
         private readonly PageFactory $pageFactory,
         private readonly Registry $registry,
         private readonly DateTime $dateTime,
+        private readonly LicenseValidator $licenseValidator,
     ) {
         parent::__construct($context);
     }
 
     public function execute()
     {
+        if (!$this->licenseValidator->isValid()) {
+            return $this->resultFactory
+                ->create(ResultFactory::TYPE_REDIRECT)
+                ->setPath('etechflow_abandonedcart/license/gate');
+        }
+
         $now = time();
         $defaultFrom = $this->dateTime->gmtDate('Y-m-d', $now - (30 * 86400));
         $defaultTo   = $this->dateTime->gmtDate('Y-m-d', $now);
