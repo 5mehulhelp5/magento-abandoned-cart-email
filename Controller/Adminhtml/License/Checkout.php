@@ -123,14 +123,22 @@ class Checkout extends Action implements HttpPostActionInterface
         string $email,
         string $domain
     ): string {
-        $base = $this->getBackendBaseUrl();
-        $successUrl = $base . 'etechflow_abandonedcart/license/activated'
-            . '?session_id={CHECKOUT_SESSION_ID}'
-            . '&plan=' . urlencode($plan)
-            . '&domain=' . urlencode($domain)
-            . '&name=' . urlencode($name)
-            . '&email=' . urlencode($email);
-        $cancelUrl = $base . 'etechflow_abandonedcart/license/gate';
+        // Generate admin URLs through the URL builder so Magento embeds the
+        // per-session secret key (/key/<hex>/). A hand-concatenated path is
+        // missing that segment and the admin guard silently bounces the
+        // off-site return to the dashboard. Stripe needs the literal
+        // {CHECKOUT_SESSION_ID} token preserved, so we substitute it back in
+        // after the URL builder has done its work.
+        $sessionPlaceholder = 'STRIPESESSIONIDPLACEHOLDER';
+        $successUrl = $this->_url->getUrl('etechflow_abandonedcart/license/activated', [
+            'session_id' => $sessionPlaceholder,
+            'plan'       => $plan,
+            'domain'     => $domain,
+            'name'       => $name,
+            'email'      => $email,
+        ]);
+        $successUrl = str_replace($sessionPlaceholder, '{CHECKOUT_SESSION_ID}', $successUrl);
+        $cancelUrl = $this->_url->getUrl('etechflow_abandonedcart/license/gate');
 
         $body = http_build_query([
             'mode'                                       => 'subscription',
@@ -169,10 +177,5 @@ class Checkout extends Action implements HttpPostActionInterface
             'yearly'  => 'year',
             default   => 'month',
         };
-    }
-
-    private function getBackendBaseUrl(): string
-    {
-        return $this->_url->getBaseUrl() . 'admin/';
     }
 }

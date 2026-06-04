@@ -39,6 +39,13 @@ class Activated extends Action implements HttpGetActionInterface
     public const ADMIN_RESOURCE = 'Etechflow_AbandonedCart::config';
     public const REGISTRY_KEY   = 'etechflow_abc_license_activated';
 
+    /**
+     * Stripe redirects here from an off-site checkout, so the inbound URL has
+     * no admin secret-key segment. Listing the action here bypasses the secret-
+     * key validator (admin login + ADMIN_RESOURCE ACL still required).
+     */
+    protected $_publicActions = ['activated'];
+
     public function __construct(
         Context $context,
         private readonly PageFactory $pageFactory,
