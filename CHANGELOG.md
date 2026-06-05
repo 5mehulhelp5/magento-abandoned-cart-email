@@ -4,6 +4,18 @@ All notable changes to Etechflow_AbandonedCart are documented here. Format follo
 
 ---
 
+## v1.0.1 — 2026-06-05
+
+Security + bundle-consistency fix.
+
+- Rotated per-module SECRET_FRAGMENTS (closes accidental plaintext-secret exposure in v1.0.0)
+- Replaced plain BUNDLE_SECRET constant with BUNDLE_SECRET_FRAGMENTS array (aligned with other ETechFlow modules)
+- BUNDLE_ID changed from 'ETECHFLOW_MAGENTO_BUNDLE_V1' to 'etechflow-bundle' (matches the rest of the suite — bundle keys interoperate)
+- MODULE_ID changed from 'abandoned-cart-popup' to 'abandoned-cart' (matches composer package name)
+- Dropped backward-compat for legacy v1.0–v1.2 'host|hmac' key format (no merchants on those versions)
+
+⚠️ v1.0.0 keys (per-module or bundle) no longer validate. Re-issue keys via tools/generate-license.php.
+
 ## [Unreleased]
 
 _Nothing pending — see v1.0.0 below for the initial release._

@@ -1,9 +1,9 @@
 {
     "name": "etechflow/module-abandoned-cart",
-    "description": "Abandoned Cart Email + Exit-Intent Popup extension for Magento 2 — recovers lost sales via automated email reminders and on-site discount popups. Fully compatible with Luma, Hyva, and Adobe Commerce.",
+    "description": "Abandoned Cart Email + Exit-Intent Popup extension for Magento 2 \u2014 recovers lost sales via automated email reminders and on-site discount popups. Fully compatible with Luma, Hyva, and Adobe Commerce.",
     "type": "magento2-module",
     "license": "proprietary",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "keywords": [
         "magento2",
         "magento",
