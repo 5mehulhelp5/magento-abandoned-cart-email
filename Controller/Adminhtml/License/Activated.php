@@ -1,17 +1,18 @@
 <?php
 /**
- * Etechflow_AbandonedCart - Post-Stripe-success handler.
+ * Etechflow_AbandonedCart - post-payment handler (webstore Paddle broker).
  *
- * Stripe redirects here with `?session_id={CHECKOUT_SESSION_ID}` after the
- * customer completes payment. We then POST to the eTechFlow Portal's
- * `/license/activate` endpoint to:
- *   1. Verify the Stripe session is paid
- *   2. Create/update the subscription row in the portal DB
- *   3. Mint and return the SP-XXXX license key
+ * The buyer returns here from the webstore Paddle checkout
+ * (module.etechflow.com) carrying the broker session id. We POST it to the
+ * broker's `/api/license/result` endpoint, which:
+ *   1. Confirms with Paddle that the transaction was actually paid
+ *   2. Has the portal mint/return the SP-XXXX license key
  *
- * On success: save the key to license_key + show success page with the
- * key visible (copy-to-clipboard button in phtml).
- * On error: show error variant with retry link.
+ * On success: save the key + show the success page (key copy-to-clipboard).
+ * On error:   show the error variant with a retry link.
+ *
+ * Same shape as the prior Stripe success -> portal activate flow; only the
+ * money rail changed from Stripe to Paddle.
  *
  * @category   ETechFlow
  * @package    Etechflow_AbandonedCart
@@ -24,14 +25,10 @@ use Etechflow\AbandonedCart\Model\LicenseValidator;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\Action\HttpGetActionInterface;
-use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
-use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\HTTP\Client\Curl;
 use Magento\Framework\Registry;
 use Magento\Framework\View\Result\PageFactory;
-use Magento\Store\Model\ScopeInterface;
 use Psr\Log\LoggerInterface;
 
 class Activated extends Action implements HttpGetActionInterface
@@ -39,11 +36,12 @@ class Activated extends Action implements HttpGetActionInterface
     public const ADMIN_RESOURCE = 'Etechflow_AbandonedCart::config';
     public const REGISTRY_KEY   = 'etechflow_abc_license_activated';
 
+    private const BROKER_URL = 'https://module.etechflow.com/api/license/result';
+    private const LICENSE_TOKEN = 'lcsk_8f3b9d2a7c14e605b9af2e7c1d8043f6';
+
     public function __construct(
         Context $context,
         private readonly PageFactory $pageFactory,
-        private readonly ScopeConfigInterface $scopeConfig,
-        private readonly EncryptorInterface $encryptor,
         private readonly Curl $curl,
         private readonly LicenseValidator $licenseValidator,
         private readonly Registry $registry,
@@ -56,50 +54,27 @@ class Activated extends Action implements HttpGetActionInterface
     {
         $sessionId = (string) $this->getRequest()->getParam('session_id');
         $plan      = (string) $this->getRequest()->getParam('plan');
-        $domain    = (string) $this->getRequest()->getParam('domain');
-        $name      = (string) $this->getRequest()->getParam('name');
-        $email     = (string) $this->getRequest()->getParam('email');
 
         $payload = [
-            'error'           => null,
-            'license_key'     => null,
-            'plan'            => $plan,
-            'settings_url'    => $this->getSettingsUrl(),
-            'management_url'  => $this->getUrl('etechflow_abandonedcart/cart/index'),
+            'error'          => null,
+            'license_key'    => null,
+            'plan'           => $plan,
+            'settings_url'   => $this->getUrl('adminhtml/system_config/edit/section/etechflow_abandoned_cart'),
+            'management_url' => $this->getUrl('etechflow_abandonedcart/cart/index'),
         ];
 
         try {
-            if ($sessionId === '' || $domain === '' || $plan === '') {
-                throw new \InvalidArgumentException('Missing required parameters from Stripe redirect');
+            if ($sessionId === '') {
+                throw new \InvalidArgumentException('Missing payment session reference');
             }
 
-            $stripeKeyEncrypted = (string) $this->scopeConfig->getValue(
-                'etechflow_abandoned_cart/payment/stripe_secret_key',
-                ScopeInterface::SCOPE_STORE
-            );
-            if ($stripeKeyEncrypted === '') {
-                throw new \RuntimeException('Stripe Secret Key not configured');
-            }
-            $stripeKey = $this->encryptor->decrypt($stripeKeyEncrypted);
-
-            $portalBase = str_replace('/license/validate', '', $this->licenseValidator->getPortalUrl());
-            $activateUrl = rtrim($portalBase, '/') . '/license/activate';
-
-            $body = json_encode([
-                'session_id'        => $sessionId,
-                'stripe_secret_key' => $stripeKey,
-                'domain'            => $domain,
-                'plan'              => $plan,
-                'name'              => $name,
-                'email'             => $email,
-                'platform'          => 'magento',
-                'module'            => LicenseValidator::MODULE_ID,
-            ], JSON_THROW_ON_ERROR);
+            $body = json_encode(['session_id' => $sessionId], JSON_THROW_ON_ERROR);
 
             $this->curl->setOption(CURLOPT_TIMEOUT, 20);
             $this->curl->addHeader('Content-Type', 'application/json');
             $this->curl->addHeader('Accept', 'application/json');
-            $this->curl->post($activateUrl, $body);
+            $this->curl->addHeader('X-ETF-License-Token', self::LICENSE_TOKEN);
+            $this->curl->post(self::BROKER_URL, $body);
 
             $status = (int) $this->curl->getStatus();
             $response = json_decode((string) $this->curl->getBody(), true);
@@ -107,13 +82,14 @@ class Activated extends Action implements HttpGetActionInterface
             if ($status !== 200 || !is_array($response) || empty($response['license_key'])) {
                 $errorMsg = is_array($response) && !empty($response['error'])
                     ? (string) $response['error']
-                    : 'Portal returned status ' . $status;
+                    : 'Payment not confirmed yet (status ' . $status . ')';
                 throw new \RuntimeException($errorMsg);
             }
 
             $key = (string) $response['license_key'];
             $this->licenseValidator->writeLicenseKey($key);
             $payload['license_key'] = $key;
+            $payload['plan'] = (string) ($response['plan'] ?? $plan);
         } catch (\Throwable $e) {
             $this->logger->error(
                 'Etechflow_AbandonedCart: license activation failed',
@@ -130,10 +106,5 @@ class Activated extends Action implements HttpGetActionInterface
             $payload['error'] === null ? __('License Activated') : __('Activation Issue')
         );
         return $page;
-    }
-
-    private function getSettingsUrl(): string
-    {
-        return $this->getUrl('adminhtml/system_config/edit/section/etechflow_abandoned_cart');
     }
 }

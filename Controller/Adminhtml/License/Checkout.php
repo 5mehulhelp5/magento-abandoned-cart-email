@@ -1,14 +1,18 @@
 <?php
 /**
- * Etechflow_AbandonedCart - Stripe Checkout session creator.
+ * Etechflow_AbandonedCart - licensing checkout (webstore Paddle broker).
  *
- * Receives POST from gate.phtml with {plan, name, email}, decrypts the
- * admin's Stripe secret key, creates a Stripe Checkout Session via direct
- * cURL, then redirects the merchant's browser to Stripe to enter card
- * details.
+ * Receives POST from gate.phtml with {plan, name, email}, then delegates to
+ * the eTechFlow webstore licensing broker (module.etechflow.com). The broker
+ * opens a Paddle transaction on the webstore's OWN Paddle account — price
+ * pulled authoritatively from the licensing portal plan — and returns the
+ * hosted pay URL. The portal still issues the SP-XXXX key once payment clears.
  *
- * On Stripe success → returns to Activated controller.
- * On Stripe cancel  → returns to Gate.
+ * On success → redirect to the Paddle hosted checkout.
+ * On cancel  → returns to Gate.
+ *
+ * No card keys live in Magento. Same redirect flow as the prior Stripe
+ * checkout; only the money rail changed from Stripe to Paddle.
  *
  * @category   ETechFlow
  * @package    Etechflow_AbandonedCart
@@ -20,12 +24,9 @@ namespace Etechflow\AbandonedCart\Controller\Adminhtml\License;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface;
-use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
-use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\HTTP\Client\Curl;
-use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -33,12 +34,15 @@ class Checkout extends Action implements HttpPostActionInterface
 {
     public const ADMIN_RESOURCE = 'Etechflow_AbandonedCart::config';
 
-    private const STRIPE_API = 'https://api.stripe.com/v1/checkout/sessions';
+    private const MODULE_ID = 'abandoned-cart';
+    private const BROKER_URL = 'https://module.etechflow.com/api/license/checkout';
+    private const LICENSE_TOKEN = 'lcsk_8f3b9d2a7c14e605b9af2e7c1d8043f6';
+
+    /** Allowed plan slugs — must match the portal's recurring plan slugs. */
+    private const PLAN_SLUGS = ['abandoned_cart_weekly', 'abandoned_cart_monthly', 'abandoned_cart_yearly'];
 
     public function __construct(
         Context $context,
-        private readonly ScopeConfigInterface $scopeConfig,
-        private readonly EncryptorInterface $encryptor,
         private readonly Curl $curl,
         private readonly StoreManagerInterface $storeManager,
         private readonly LoggerInterface $logger,
@@ -54,54 +58,51 @@ class Checkout extends Action implements HttpPostActionInterface
         $name  = trim((string) $this->getRequest()->getParam('name'));
         $email = trim((string) $this->getRequest()->getParam('email'));
 
-        if (!in_array($plan, ['weekly', 'monthly', 'yearly'], true) || $email === '') {
-            $this->messageManager->addErrorMessage(__('Please select a plan and enter your email.'));
+        if (!in_array($plan, self::PLAN_SLUGS, true) || $email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->messageManager->addErrorMessage(__('Please select a plan and enter a valid email.'));
             return $redirect->setPath('etechflow_abandonedcart/license/gate');
         }
+
+        $domain = $this->getDomain();
+
+        // The broker validates the plan slug against the portal and resolves
+        // its price there, so nothing is trusted from the browser but the slug.
+        $payload = json_encode([
+            'plan'             => $plan,
+            'name'             => $name,
+            'email'            => $email,
+            'domain'           => $domain,
+            'module'           => self::MODULE_ID,
+            'magento_callback' => $this->getUrl('etechflow_abandonedcart/license/activated'),
+            'magento_cancel'   => $this->getUrl('etechflow_abandonedcart/license/gate'),
+        ]);
 
         try {
-            $secretKeyEncrypted = (string) $this->scopeConfig->getValue(
-                'etechflow_abandoned_cart/payment/stripe_secret_key',
-                ScopeInterface::SCOPE_STORE
-            );
-            if ($secretKeyEncrypted === '') {
-                $this->messageManager->addErrorMessage(__('Stripe Secret Key is not configured. Set it under Stores → Configuration → ETechFlow → Payment Settings.'));
-                return $redirect->setPath('etechflow_abandonedcart/license/gate');
-            }
-
-            $stripeKey = $this->encryptor->decrypt($secretKeyEncrypted);
-            $currency  = strtolower((string) $this->scopeConfig->getValue(
-                'etechflow_abandoned_cart/payment/stripe_currency',
-                ScopeInterface::SCOPE_STORE
-            ) ?: 'usd');
-
-            $price = $this->resolvePrice($plan);
-            if ($price <= 0) {
-                $this->messageManager->addErrorMessage(__('The selected plan has no price configured.'));
-                return $redirect->setPath('etechflow_abandonedcart/license/gate');
-            }
-
-            $domain = $this->getDomain();
-            $sessionUrl = $this->createStripeSession($stripeKey, $currency, $price, $plan, $name, $email, $domain);
-
-            return $redirect->setUrl($sessionUrl);
+            $this->curl->setOption(CURLOPT_TIMEOUT, 20);
+            $this->curl->addHeader('Content-Type', 'application/json');
+            $this->curl->addHeader('Accept', 'application/json');
+            $this->curl->addHeader('X-ETF-License-Token', self::LICENSE_TOKEN);
+            $this->curl->post(self::BROKER_URL, $payload);
+            $status = (int) $this->curl->getStatus();
+            $data   = json_decode((string) $this->curl->getBody(), true);
         } catch (\Throwable $e) {
             $this->logger->error(
-                'Etechflow_AbandonedCart: Stripe checkout failed',
+                'Etechflow_AbandonedCart: licensing checkout failed',
                 ['exception' => $e->getMessage(), 'plan' => $plan]
             );
-            $this->messageManager->addErrorMessage(__('Could not start checkout: %1', $e->getMessage()));
+            $this->messageManager->addErrorMessage(__('Could not reach the licensing portal. Please try again.'));
             return $redirect->setPath('etechflow_abandonedcart/license/gate');
         }
-    }
 
-    private function resolvePrice(string $plan): int
-    {
-        $path = 'etechflow_abandoned_cart/plans/' . $plan . '_price';
-        $raw = (string) $this->scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE);
-        $amount = (float) $raw;
-        // Stripe expects integer cents
-        return (int) round($amount * 100);
+        if ($status === 200 && is_array($data) && !empty($data['url'])) {
+            return $redirect->setUrl((string) $data['url']);
+        }
+
+        $err = is_array($data) && !empty($data['error'])
+            ? (string) $data['error']
+            : ('Portal returned status ' . $status);
+        $this->messageManager->addErrorMessage(__('Checkout error: %1', $err));
+        return $redirect->setPath('etechflow_abandonedcart/license/gate');
     }
 
     private function getDomain(): string
@@ -109,70 +110,5 @@ class Checkout extends Action implements HttpPostActionInterface
         $baseUrl = (string) $this->storeManager->getStore()->getBaseUrl();
         $host = (string) parse_url($baseUrl, PHP_URL_HOST);
         return strtolower(preg_replace('/^www\./', '', $host));
-    }
-
-    /**
-     * Build a Stripe Checkout Session via direct cURL. Returns the redirect URL.
-     */
-    private function createStripeSession(
-        string $stripeKey,
-        string $currency,
-        int $amountCents,
-        string $plan,
-        string $name,
-        string $email,
-        string $domain
-    ): string {
-        $base = $this->getBackendBaseUrl();
-        $successUrl = $base . 'etechflow_abandonedcart/license/activated'
-            . '?session_id={CHECKOUT_SESSION_ID}'
-            . '&plan=' . urlencode($plan)
-            . '&domain=' . urlencode($domain)
-            . '&name=' . urlencode($name)
-            . '&email=' . urlencode($email);
-        $cancelUrl = $base . 'etechflow_abandonedcart/license/gate';
-
-        $body = http_build_query([
-            'mode'                                       => 'subscription',
-            'customer_email'                             => $email,
-            'success_url'                                => $successUrl,
-            'cancel_url'                                 => $cancelUrl,
-            'line_items[0][price_data][currency]'        => $currency,
-            'line_items[0][price_data][product_data][name]' => 'Etechflow Abandoned Cart — ' . ucfirst($plan),
-            'line_items[0][price_data][unit_amount]'     => (string) $amountCents,
-            'line_items[0][price_data][recurring][interval]' => $this->stripeInterval($plan),
-            'line_items[0][quantity]'                    => '1',
-            'metadata[domain]'                           => $domain,
-            'metadata[plan]'                             => $plan,
-            'metadata[contact_name]'                     => $name,
-        ]);
-
-        $this->curl->setOption(CURLOPT_TIMEOUT, 15);
-        $this->curl->addHeader('Authorization', 'Bearer ' . $stripeKey);
-        $this->curl->addHeader('Content-Type', 'application/x-www-form-urlencoded');
-        $this->curl->post(self::STRIPE_API, $body);
-
-        $response = (string) $this->curl->getBody();
-        $data = json_decode($response, true);
-        if (!is_array($data) || empty($data['url'])) {
-            $errorMsg = $data['error']['message'] ?? 'Unknown Stripe error';
-            throw new \RuntimeException($errorMsg);
-        }
-        return (string) $data['url'];
-    }
-
-    private function stripeInterval(string $plan): string
-    {
-        return match ($plan) {
-            'weekly'  => 'week',
-            'monthly' => 'month',
-            'yearly'  => 'year',
-            default   => 'month',
-        };
-    }
-
-    private function getBackendBaseUrl(): string
-    {
-        return $this->_url->getBaseUrl() . 'admin/';
     }
 }

@@ -263,17 +263,17 @@
                 <field id="issued_key" translate="label comment" type="obscure" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Issued Key (managed)</label>
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
-                    <comment><![CDATA[Auto-populated after Stripe checkout. Used to auto-restore the license if the portal blocks/unblocks your IP. Do not edit manually.]]></comment>
+                    <comment><![CDATA[Auto-populated after checkout. Used to auto-restore the license if the portal blocks/unblocks your IP. Do not edit manually.]]></comment>
                 </field>
             </group>
 
             <group id="payment" translate="label" type="text" sortOrder="85" showInDefault="1" showInWebsite="0" showInStore="0">
-                <label>Payment Settings (Stripe)</label>
+                <label>Payment Settings (legacy Stripe — no longer used)</label>
 
                 <field id="stripe_secret_key" translate="label comment" type="obscure" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Stripe Secret Key</label>
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
-                    <comment><![CDATA[Your Stripe <code>sk_test_</code> or <code>sk_live_</code> key. Used to create Stripe Checkout sessions when customers subscribe.]]></comment>
+                    <comment><![CDATA[Your Stripe <code>sk_test_</code> or <code>sk_live_</code> key. No longer required: licence payments now run on module.etechflow.com via Paddle. Safe to leave blank.]]></comment>
                 </field>
 
                 <field id="stripe_publishable_key" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">

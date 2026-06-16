@@ -77,7 +77,7 @@ $settingsUrl = $block->getSettingsUrl();
                 <li><?= $escaper->escapeHtml(__('Cancel anytime')) ?></li>
                 <li><?= $escaper->escapeHtml(__('Full feature access')) ?></li>
             </ul>
-            <button type="button" onclick="etfShowForm('weekly','<?= $escaper->escapeJs($weeklyLabel) ?>','<?= $escaper->escapeJs($block->formatPrice($weeklyPrice)) ?>/week')">
+            <button type="button" onclick="etfShowForm('abandoned_cart_weekly','<?= $escaper->escapeJs($weeklyLabel) ?>','<?= $escaper->escapeJs($block->formatPrice($weeklyPrice)) ?>/week')">
                 <?= $escaper->escapeHtml(__('Subscribe Weekly')) ?>
             </button>
         </div>
@@ -91,7 +91,7 @@ $settingsUrl = $block->getSettingsUrl();
                 <li><?= $escaper->escapeHtml(__('Cancel anytime')) ?></li>
                 <li><?= $escaper->escapeHtml(__('Full feature access')) ?></li>
             </ul>
-            <button type="button" onclick="etfShowForm('monthly','<?= $escaper->escapeJs($monthlyLabel) ?>','<?= $escaper->escapeJs($block->formatPrice($monthlyPrice)) ?>/mo')">
+            <button type="button" onclick="etfShowForm('abandoned_cart_monthly','<?= $escaper->escapeJs($monthlyLabel) ?>','<?= $escaper->escapeJs($block->formatPrice($monthlyPrice)) ?>/mo')">
                 <?= $escaper->escapeHtml(__('Subscribe Monthly')) ?>
             </button>
         </div>
@@ -105,7 +105,7 @@ $settingsUrl = $block->getSettingsUrl();
                 <li><?= $escaper->escapeHtml(__('Pay once, use all year')) ?></li>
                 <li><?= $escaper->escapeHtml(__('Full feature access')) ?></li>
             </ul>
-            <button type="button" onclick="etfShowForm('yearly','<?= $escaper->escapeJs($yearlyLabel) ?>','<?= $escaper->escapeJs($block->formatPrice($yearlyPrice)) ?>/yr')">
+            <button type="button" onclick="etfShowForm('abandoned_cart_yearly','<?= $escaper->escapeJs($yearlyLabel) ?>','<?= $escaper->escapeJs($block->formatPrice($yearlyPrice)) ?>/yr')">
                 <?= $escaper->escapeHtml(__('Subscribe Yearly')) ?>
             </button>
         </div>
@@ -124,7 +124,7 @@ $settingsUrl = $block->getSettingsUrl();
         <input type="email" name="email" id="etf-email" required maxlength="255">
 
         <div class="etf-form-buttons">
-            <button type="submit"><?= $escaper->escapeHtml(__('Continue to Stripe Checkout')) ?></button>
+            <button type="submit"><?= $escaper->escapeHtml(__('Continue to Checkout')) ?></button>
             <button type="button" onclick="etfHideForm()"><?= $escaper->escapeHtml(__('Cancel')) ?></button>
         </div>
     </form>
