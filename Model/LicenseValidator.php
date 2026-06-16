@@ -344,11 +344,8 @@ final class LicenseValidator
 
     private function isProductionEnvironment(): bool
     {
-        $value = $this->scopeConfig->getValue(self::XML_PATH_PRODUCTION, ScopeInterface::SCOPE_STORE);
-        if ($value === null || $value === '') {
-            return true;
-        }
-        return (string) $value !== '0';
+        // Production-environment toggle removed: licensing is always enforced.
+        return true;
     }
 
     private function canonicalize(string $host): string

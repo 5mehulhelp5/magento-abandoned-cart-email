@@ -242,13 +242,7 @@
                     <comment><![CDATA[Paste your license key. Accepts both HMAC keys (offline) and SP-XXXX subscription keys (validated via portal). Dev hosts (.test, .local, localhost) bypass automatically.]]></comment>
                 </field>
 
-                <field id="is_production" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Production Environment</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Set to No to skip license checks during development.</comment>
-                </field>
-
-                <field id="bundle_license_key" translate="label comment" type="obscure" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+<field id="bundle_license_key" translate="label comment" type="obscure" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Bundle License Key</label>
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                     <config_path>etechflow_bundle/license/license_key</config_path>
@@ -267,27 +261,7 @@
                 </field>
             </group>
 
-            <group id="payment" translate="label" type="text" sortOrder="85" showInDefault="1" showInWebsite="0" showInStore="0">
-                <label>Payment Settings (legacy Stripe — no longer used)</label>
-
-                <field id="stripe_secret_key" translate="label comment" type="obscure" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Stripe Secret Key</label>
-                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
-                    <comment><![CDATA[Your Stripe <code>sk_test_</code> or <code>sk_live_</code> key. No longer required: licence payments now run on module.etechflow.com via Paddle. Safe to leave blank.]]></comment>
-                </field>
-
-                <field id="stripe_publishable_key" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Stripe Publishable Key</label>
-                    <comment><![CDATA[Your Stripe <code>pk_test_</code> or <code>pk_live_</code> key.]]></comment>
-                </field>
-
-                <field id="stripe_currency" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Currency Code</label>
-                    <comment>Three-letter ISO code (usd, eur, gbp, pkr, etc.). Default: usd.</comment>
-                </field>
-            </group>
-
-            <group id="plans" translate="label" type="text" sortOrder="90" showInDefault="1" showInWebsite="0" showInStore="0">
+<group id="plans" translate="label" type="text" sortOrder="90" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Subscription Plan Prices</label>
 
                 <field id="weekly_price" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
