@@ -78,7 +78,7 @@ final class LicenseValidator
 
     /* ---------------- Portal + cache + grace ------------------------------- */
 
-    private const DEFAULT_PORTAL_URL  = 'https://license.etechflow.com/license/validate';
+    private const DEFAULT_PORTAL_URL  = 'https://license-service.etechflow.com/license/validate';
     public  const PORTAL_CACHE_TTL     = 30;
     public  const PORTAL_CACHE_TTL_BAD = 60;
     private const CACHE_TAG    = 'ETECHFLOW_ABC';
