@@ -73,7 +73,7 @@
                 <issued_key></issued_key>
                 <issued_at>0</issued_at>
                 <ip_blocked>0</ip_blocked>
-                <portal_url>https://license.etechflow.com/license/validate</portal_url>
+                <portal_url>https://license-service.etechflow.com/license/validate</portal_url>
                 <bundle_license_key></bundle_license_key>
             </license>
 
