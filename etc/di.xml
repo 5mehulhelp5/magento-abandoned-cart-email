@@ -78,6 +78,24 @@
             </argument>
         </arguments>
     </type>
+
+    <!--
+        Grid CollectionFactory data-sources registered in GLOBAL scope (moved
+        from etc/adminhtml/di.xml). An adminhtml-scope `collections` argument
+        REPLACES (not merges) the global one, which wiped core admin grids
+        (sales_order_grid_data_source) in the admin area. Global scope merges
+        additively with core + other modules.
+    -->
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="etechflow_abandonedcart_cart_listing_data_source" xsi:type="string">Etechflow\AbandonedCart\Model\ResourceModel\AbandonedCart\Grid\Collection</item>
+                <item name="etechflow_abandonedcart_rule_listing_data_source" xsi:type="string">Etechflow\AbandonedCart\Model\ResourceModel\Rule\Grid\Collection</item>
+                <item name="etechflow_abandonedcart_popup_rule_listing_data_source" xsi:type="string">Etechflow\AbandonedCart\Model\ResourceModel\PopupRule\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+
     <!-- Admin notification: pending abandoned carts -->
     <type name="Magento\AdminNotification\Model\System\MessageList">
         <arguments>

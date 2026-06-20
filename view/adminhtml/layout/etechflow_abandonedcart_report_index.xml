@@ -1,11 +1,15 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
-    <update handle="styles"/>
     <body>
         <referenceContainer name="content">
+            <block class="Etechflow\AbandonedCart\Block\Adminhtml\UpdateNotice"
+                   name="etechflow_abc_update_notice_report"
+                   template="Etechflow_AbandonedCart::update-notice.phtml"
+                   cacheable="false"
+                   before="-"/>
             <block class="Etechflow\AbandonedCart\Block\Adminhtml\Report\Dashboard"
-                   name="etechflow.abandonedcart.report.dashboard"
+                   name="etechflow_abandonedcart_report_dashboard"
                    template="Etechflow_AbandonedCart::report/dashboard.phtml"/>
         </referenceContainer>
     </body>

@@ -1,8 +1,5 @@
 <?php
 declare(strict_types=1);
-/**
- * Etechflow_AbandonedCart — admin notification: pending abandoned carts
- */
 namespace Etechflow\AbandonedCart\Model\System\Message;
 
 use Magento\Framework\App\ResourceConnection;
@@ -53,8 +50,9 @@ class PendingCarts implements MessageInterface
             try {
                 $conn        = $this->resource->getConnection();
                 $table       = $conn->getTableName('etechflow_abandoned_cart');
+                // status = 1 means pending/not yet processed
                 $this->count = (int) $conn->fetchOne(
-                    "SELECT COUNT(*) FROM `{$table}` WHERE status = 'pending'"
+                    "SELECT COUNT(*) FROM `{$table}` WHERE status = 1"
                 );
             } catch (\Exception $e) {
                 $this->count = 0;

@@ -36,7 +36,7 @@ final class LicenseValidator
 {
     /* ---------------- Per-module identity (LICENSING_PROTOCOL §3) ---------- */
 
-    public const MODULE_ID = 'abandoned-cart';
+    public const MODULE_ID = 'abandoned-cart-popup';
 
     /**
      * Four random strings unique to THIS module. Combined to form the per-module
@@ -45,26 +45,21 @@ final class LicenseValidator
      * `docs/license.ts.example`.
      */
     private const SECRET_FRAGMENTS = [
-        'Rtqm8EdwsuD3',
-        'ftqjg2Geppx0',
-        'pMYds482oUJt',
-        '1TitqYJr7Cuc',
+        '4kJ9mP2qXyZ8',
+        'rT7cE3gH5jLn',
+        '9bRtV6sV8nS2',
+        'F1nQ4rT7bA8c',
     ];
 
     /* ---------------- Shared bundle (must match other ETechFlow modules) --- */
 
-    public const BUNDLE_ID = 'etechflow-bundle';
+    public const BUNDLE_ID = 'ETECHFLOW_MAGENTO_BUNDLE_V1';
 
     /**
-     * Shared bundle secret fragments. Concatenated at runtime — MUST match
-     * tools/generate-license.php and every sibling ETechFlow module exactly.
+     * Shared bundle secret — change in lockstep across every ETechFlow module
+     * + the CLI generator + the webstore. Compiled here for offline validation.
      */
-    private const BUNDLE_SECRET_FRAGMENTS = [
-        'eTF-BUNDLE-2026',
-        'k2D9-mP4x',
-        'L8nR-vH2j',
-        'X7tY-zW5q',
-    ];
+    private const BUNDLE_SECRET = '9e7c4f2a8b5d3e1c6f9a2b4e7d8c1a3b5e9f4d2c7a8b1e6f3d4c9a2b5e7f8d1c';
 
     /* ---------------- Admin config paths ----------------------------------- */
 
@@ -78,7 +73,7 @@ final class LicenseValidator
 
     /* ---------------- Portal + cache + grace ------------------------------- */
 
-    private const DEFAULT_PORTAL_URL  = 'https://license-service.etechflow.com/license/validate';
+    private const DEFAULT_PORTAL_URL  = 'https://license.etechflow.com/license/validate';
     public  const PORTAL_CACHE_TTL     = 30;
     public  const PORTAL_CACHE_TTL_BAD = 60;
     private const CACHE_TAG    = 'ETECHFLOW_ABC';
@@ -203,7 +198,7 @@ final class LicenseValidator
     public function computeBundleKey(string $host): string
     {
         $payload = self::BUNDLE_ID . ':' . $this->canonicalize($host);
-        return hash_hmac('sha256', $payload, implode('', self::BUNDLE_SECRET_FRAGMENTS));
+        return hash_hmac('sha256', $payload, self::BUNDLE_SECRET);
     }
 
     /* ====================================================================== */
@@ -251,11 +246,30 @@ final class LicenseValidator
         // HMAC bundle key
         $bundleKey = trim((string) $this->scopeConfig->getValue(self::XML_PATH_BUNDLE_LICENSE_KEY, ScopeInterface::SCOPE_STORE));
         if ($bundleKey === '') {
-            return false;
+            // Legacy format support: "host|hmac"
+            return $this->verifyLegacyFormat($configured, $host);
         }
         return hash_equals($this->computeBundleKey($host), $bundleKey);
     }
 
+    /**
+     * Backward-compat for v1.0–v1.2 keys minted as "host|hex-hmac".
+     * Recompute using the BUNDLE_ID:host scheme (old style) and accept if match.
+     */
+    private function verifyLegacyFormat(string $key, string $host): bool
+    {
+        $parts = explode('|', $key, 2);
+        if (count($parts) !== 2) {
+            return false;
+        }
+        [$keyHost, $providedHmac] = $parts;
+        $keyHost = $this->canonicalize($keyHost);
+        if ($keyHost !== $host) {
+            return false;
+        }
+        $expected = hash_hmac('sha256', self::BUNDLE_ID . ':' . $host, self::BUNDLE_SECRET);
+        return hash_equals($expected, $providedHmac);
+    }
 
     /* ====================================================================== */
     /* Portal validation                                                      */
