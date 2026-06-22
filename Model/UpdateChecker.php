@@ -72,37 +72,27 @@ class UpdateChecker
 
     private function installedVersion(): string
     {
-        // 1) Composer InstalledVersions — reliable when installed via `composer require`
-        if (class_exists('\Composer\InstalledVersions')) {
-            try {
-                $v = \Composer\InstalledVersions::getPrettyVersion(self::PACKAGE);
-                if ($v) return ltrim((string)$v, 'v');
-            } catch (\Throwable $e) {}
-        }
-
-        // 2) setup_module table — authoritative for app/code modules;
-        //    reflects what actually ran through `bin/magento setup:upgrade`.
-        //    Checked BEFORE the module's own composer.json because composer.json
-        //    in app/code often carries a dev/next version string.
+        // Read the installed Composer package version (matches the deployed
+        // package; independent of setup_module schema_version, which can lag
+        // the Composer release numbering and cause a false 'update available').
         try {
-            $conn  = $this->resource->getConnection();
-            $table = $this->resource->getTableName('setup_module');
-            $v = $conn->fetchOne(
-                "SELECT schema_version FROM {$table} WHERE module = ?",
-                [self::MODULE_NAME]
-            );
-            if ($v) return ltrim((string)$v, 'v');
-        } catch (\Throwable $e) {}
-
-        // 3) Module's own composer.json (last resort)
-        try {
-            $path = $this->componentRegistrar->getPath(ComponentRegistrar::MODULE, self::MODULE_NAME);
-            if ($path && is_file($path . '/composer.json')) {
-                $json = json_decode((string) file_get_contents($path . '/composer.json'), true);
-                if (!empty($json['version'])) return ltrim((string)$json['version'], 'v');
+            $registrar = new \Magento\Framework\Component\ComponentRegistrar();
+            $path = $registrar->getPath(\Magento\Framework\Component\ComponentRegistrar::MODULE, self::MODULE_NAME);
+            if ($path) {
+                $composerFile = $path . '/composer.json';
+                if (is_file($composerFile)) {
+                    $data = json_decode((string)file_get_contents($composerFile), true);
+                    if (is_array($data) && !empty($data['version'])) {
+                        return ltrim((string)$data['version'], 'v');
+                    }
+                }
             }
         } catch (\Throwable $e) {}
-
-        return '';
+        try {
+            $v = $this->resource->getConnection()->fetchOne(
+                'SELECT schema_version FROM ' . $this->resource->getTableName('setup_module') . ' WHERE module = ?',
+                [self::MODULE_NAME]);
+            return $v ? (string)$v : '';
+        } catch (\Throwable $e) { return ''; }
     }
 }
