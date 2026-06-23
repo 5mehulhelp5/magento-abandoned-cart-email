@@ -90,8 +90,37 @@
         <arguments>
             <argument name="collections" xsi:type="array">
                 <item name="etechflow_abandonedcart_cart_listing_data_source" xsi:type="string">Etechflow\AbandonedCart\Model\ResourceModel\AbandonedCart\Grid\Collection</item>
-                <item name="etechflow_abandonedcart_rule_listing_data_source" xsi:type="string">Etechflow\AbandonedCart\Model\ResourceModel\Rule\Grid\Collection</item>
                 <item name="etechflow_abandonedcart_popup_rule_listing_data_source" xsi:type="string">Etechflow\AbandonedCart\Model\ResourceModel\PopupRule\Grid\Collection</item>
+                <item name="etechflow_abandonedcart_rule_listing_data_source" xsi:type="string">Etechflow\AbandonedCart\Model\ResourceModel\Rule\Grid\Collection</item>
+                <item name="etechflow_aiseo_suggestion_listing_data_source" xsi:type="string">Etechflow\AiSeo\Model\ResourceModel\Suggestion\Grid\Collection</item>
+                <item name="etechflow_bannerslider_banner_listing_data_source" xsi:type="string">ETechFlow\BannerSlider\Model\ResourceModel\Banner\Grid\Collection</item>
+                <item name="etechflow_bannerslider_slider_listing_data_source" xsi:type="string">ETechFlow\BannerSlider\Model\ResourceModel\Slider\Grid\Collection</item>
+                <item name="etechflow_bisn_subscription_listing_data_source" xsi:type="string">ETechFlowBisnSubscriptionGridSearchResult</item>
+                <item name="etechflow_blog_author_listing_data_source" xsi:type="string">Etechflow\Blog\Model\ResourceModel\Author\Grid\Collection</item>
+                <item name="etechflow_blog_category_listing_data_source" xsi:type="string">Etechflow\Blog\Model\ResourceModel\Category\Grid\Collection</item>
+                <item name="etechflow_blog_comment_listing_data_source" xsi:type="string">Etechflow\Blog\Model\ResourceModel\Comment\Grid\Collection</item>
+                <item name="etechflow_blog_post_listing_data_source" xsi:type="string">Etechflow\Blog\Model\ResourceModel\Post\Grid\Collection</item>
+                <item name="etechflow_blog_tag_listing_data_source" xsi:type="string">Etechflow\Blog\Model\ResourceModel\Tag\Grid\Collection</item>
+                <item name="etechflow_dd_exception_day_listing_data_source" xsi:type="string">ETechFlow\DeliveryDate\Model\ResourceModel\ExceptionDay\Grid\Collection</item>
+                <item name="etechflow_dd_time_interval_listing_data_source" xsi:type="string">ETechFlow\DeliveryDate\Model\ResourceModel\TimeInterval\Grid\Collection</item>
+                <item name="etechflow_io_log_listing_data_source" xsi:type="string">ETechFlowIoLogGridSearchResult</item>
+                <item name="etechflow_isp_amenity_listing_data_source" xsi:type="string">ETechFlow\InStorePickup\Model\ResourceModel\Amenity\Grid\Collection</item>
+                <item name="etechflow_isp_holiday_listing_data_source" xsi:type="string">ETechFlow\InStorePickup\Model\ResourceModel\Holiday\Grid\Collection</item>
+                <item name="etechflow_isp_pickupwindow_listing_data_source" xsi:type="string">ETechFlow\InStorePickup\Model\ResourceModel\PickupWindow\Grid\Collection</item>
+                <item name="etechflow_isp_store_listing_data_source" xsi:type="string">ETechFlow\InStorePickup\Model\ResourceModel\Store\Grid\Collection</item>
+                <item name="etechflow_isp_tag_listing_data_source" xsi:type="string">ETechFlow\InStorePickup\Model\ResourceModel\Tag\Grid\Collection</item>
+                <item name="etechflow_metatemplate_listing_data_source" xsi:type="string">Etechflow\MetaTemplates\Model\ResourceModel\Template\Grid\Collection</item>
+                <item name="etechflow_pso_optimization_log_listing_data_source" xsi:type="string">ETechFlowPsoOptimizationLogGridCollection</item>
+                <item name="etechflow_question_listing_data_source" xsi:type="string">ETechFlow\AdvancedProductReviews\Model\ResourceModel\Question\Grid\Collection</item>
+                <item name="etechflow_redirect_404_log_listing_data_source" xsi:type="string">Etechflow\RedirectManager\Model\ResourceModel\Log\Grid\Collection</item>
+                <item name="etechflow_redirect_listing_data_source" xsi:type="string">Etechflow\RedirectManager\Model\ResourceModel\Redirect\Grid\Collection</item>
+                <item name="etechflow_reminder_listing_data_source" xsi:type="string">ETechFlow\AdvancedProductReviews\Model\ResourceModel\Reminder\Grid\Collection</item>
+                <item name="etechflow_review_comment_listing_data_source" xsi:type="string">ETechFlow\AdvancedProductReviews\Model\ResourceModel\ReviewComment\Grid\Collection</item>
+                <item name="etechflow_seoaudit_issue_listing_data_source" xsi:type="string">Etechflow\SeoAudit\Model\ResourceModel\Issue\Grid\Collection</item>
+                <item name="etechflow_vehicle_make_listing_data_source" xsi:type="string">ETechFlow\ProductFitmentFinder\Make\Grid\Collection</item>
+                <item name="etechflow_vehicle_model_listing_data_source" xsi:type="string">ETechFlow\ProductFitmentFinder\Model\Grid\Collection</item>
+                <item name="etechflow_warning_listing_data_source" xsi:type="string">ETechFlow\ProductWarning\Grid\Collection</item>
+                <item name="order_email_editor_history_listing_data_source" xsi:type="string">ETechFlow\OrderEmailEditor\Model\ResourceModel\EmailChangeHistory\Grid\Collection</item>
             </argument>
         </arguments>
     </type>
