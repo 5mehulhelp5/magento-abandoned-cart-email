@@ -1,18 +1,18 @@
 <?php
 /**
- * Etechflow_AbandonedCart - licensing checkout (webstore Paddle broker).
+ * Etechflow_AbandonedCart - licensing checkout (webstore Stripe broker).
  *
  * Receives POST from gate.phtml with {plan, name, email}, then delegates to
  * the eTechFlow webstore licensing broker (module.etechflow.com). The broker
- * opens a Paddle transaction on the webstore's OWN Paddle account — price
+ * opens a Stripe transaction on the webstore's OWN Stripe account — price
  * pulled authoritatively from the licensing portal plan — and returns the
  * hosted pay URL. The portal still issues the SP-XXXX key once payment clears.
  *
- * On success → redirect to the Paddle hosted checkout.
+ * On success → redirect to the Stripe hosted checkout.
  * On cancel  → returns to Gate.
  *
  * No card keys live in Magento. Same redirect flow as the prior Stripe
- * checkout; only the money rail changed from Stripe to Paddle.
+ * checkout; only the money rail is Stripe.
  *
  * @category   ETechFlow
  * @package    Etechflow_AbandonedCart

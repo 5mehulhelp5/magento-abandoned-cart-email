@@ -1,18 +1,18 @@
 <?php
 /**
- * Etechflow_AbandonedCart - post-payment handler (webstore Paddle broker).
+ * Etechflow_AbandonedCart - post-payment handler (webstore Stripe broker).
  *
- * The buyer returns here from the webstore Paddle checkout
+ * The buyer returns here from the webstore Stripe checkout
  * (module.etechflow.com) carrying the broker session id. We POST it to the
  * broker's `/api/license/result` endpoint, which:
- *   1. Confirms with Paddle that the transaction was actually paid
+ *   1. Confirms with Stripe that the transaction was actually paid
  *   2. Has the portal mint/return the SP-XXXX license key
  *
  * On success: save the key + show the success page (key copy-to-clipboard).
  * On error:   show the error variant with a retry link.
  *
  * Same shape as the prior Stripe success -> portal activate flow; only the
- * money rail changed from Stripe to Paddle.
+ * money rail is Stripe.
  *
  * @category   ETechFlow
  * @package    Etechflow_AbandonedCart
